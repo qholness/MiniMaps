@@ -6,105 +6,81 @@
 {% block content %}
 <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
 <script>
-    var stage, circle, rect, stations, laststation, stationgraphics;
-    var lat, lon, station;
-    var rectsize = 10;
+    var stage, circle, rect, station, laststation, stationgraphics;
+    var rectsize = 50;
+    var counter = 0;
+    var storage = [];
     stations = [];
 
-
-
-    
     function init() {
+        // Set stage
+        counter = 0;
+        stations = [];
         stage = new createjs.Stage("demoCanvas");
-
-
+        
         // Set circle
         circle = new createjs.Shape();
         circle.graphics.beginFill("DeepSkyBlue")
             .drawCircle(0, 0, 5);
         circle.x = 100;
-        circle.y = 100;
+        circle.y = Math.floor(stage.canvas.width / 3);
 
-
-        // Set stations
-        {% for index, row in data.iterrows() %}
-            lat = {{ row['POINT_X'] }};
-            lon = {{ row['POINT_Y'] }};
-            station = new createjs.Shape();
-            stationgraphics = station.graphics;
-            stationgraphics.beginFill("Red")
-                .drawRect(0, 0, rectsize, rectsize);
-            stationgraphics.moveTo(lat, lon);
-            station.x = lat;
-            station.y = lon;
-            if (laststation) {
-                stationgraphics.setStrokeStyle(3);
-                stationgraphics.beginStroke('black');
-                stationgraphics.lineTo(laststation.x, laststation.y);
-                stationgraphics.endStroke();
-            }
-            stage.addChild(station);
-            stations.push(station);
-            laststation = station;
-        {% endfor %}
-
-
-
-        stage.addChild(circle);
-
+        // Set station
+        station = new createjs.Shape();
+        station.graphics.beginFill("Grey")
+            .drawRect(0,0,rectsize, rectsize);
+        station.x = Math.floor(stage.canvas.width / 2);
+        station.y = circle.y - 25;
 
         // Event ticker
-        createjs.Ticker.addEventListener("tick", tick);
+        createjs.Ticker.addEventListener("tick", update);
+
+        // Set ticker
         createjs.Ticker.setFPS(60);
+        
+        // Add objects to stage
+        stage.addChild(circle);
+        stage.addChild(station);
 
-
-        // Keyboard inputs
-        document.addEventListener('keydown', function(event) {
-            if(event.keyCode == 37) {
-                // Left
-                circle.x = circle.x - 5;
-            }
-            if(event.keyCode == 39) {
-                // Left
-                circle.x = circle.x + 5;
-            }
-            if(event.keyCode == 38) {
-                // Up
-                circle.y = circle.y - 5;
-            }
-            if(event.keyCode == 40) {
-                // Down
-                circle.y = circle.y + 5;
-            }
-        });
     }
-    function pause(){
-        createjs.Ticker.setPaused(true);
-    }
-    function within(x, y, distance=5) {
-        if (Math.abs(x - y) < distance ) {
-            return true
+    
+    // within x pixels
+    function within(x,y) {
+        
+        if (Math.abs(x - y) < 10) {
+            return true;
         }
+        
         return false;
     }
-    function findslope(x1,x2,y1,y2){
-        return (x2-x1)/(y2-y1);
+
+    // Fill the station
+    function fillStation() {
+        if (within(circle.x, station.x)) {
+            station.height = station.height + .05;
+            station.width = station.width + .05;
+            station.y = station.y - 1;
+            circle.x = 0;
+            counter++;
+        }
+        if (station.scaleX > 1.5) {
+            station.height = rectsize;
+            station.width = rectsize;
+        }
     }
+    
+    function update(event) {
+        circle.x = circle.x + 15;
+        circle.y = circle.y + 0;
 
-
-    function tick(event) {
+        // Fill the station
+        fillStation();
+        console.log(station.scaleX);
+        if (circle.y > stage.canvas.height) {
+            circle.y = 100;
+        }
 
         stage.update(event); // important!!
-        
-        // Remove nodes
-        /*for (var i=0; i < stations.length; i++) {
-            station = stations[i];
-            if (within(xpos, station.x) && within(ypos, station.y)) {
-                stations.splice(i, 1, station);
-                stage.removeChild(stations[i]);
-                console.log("Ding");
-            }
-        }*/
     }
 </script>
 <div>
@@ -112,5 +88,6 @@
     <button onclick="pause();">Pause</button>
     <canvas id='demoCanvas', width=800 height=560 style="border: solid 1px;">
     </canvas>
+
 </div>
 {% endblock %}
