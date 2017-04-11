@@ -10,13 +10,25 @@
     var rectsize = 50;
     var counter = 0;
     var storage = [];
-    stations = [];
+    var text;
+    var counter;
+    var node;
+    var nodes = [];
+    var circleSpeed = 10;
+    var paused = false;
+    var exhaleTemp;
 
     function init() {
         // Set stage
-        counter = 0;
         stations = [];
+        nodes = [];
         stage = new createjs.Stage("demoCanvas");
+
+        // Set text
+        text = new createjs.Text("Fill the station!", "20px Arial", "black");
+        text.x = 100;
+        text.y = 100;
+        stage.addChild(text);
         
         // Set circle
         circle = new createjs.Shape();
@@ -57,35 +69,26 @@
     function fillStation() {
         if (within(circle.x, station.x)) {
             if (within(circle.y, station.y, 30)) {
-                station.scaleX = station.scaleX + .05;
-                station.scaleY = station.scaleY + .05;
-                station.y = station.y - 1;
                 circle.x = 0;
             }
         }
-        if (station.scaleX > 1.5) {
-            station.scaleX = 1;
-            station.scaleY = 1;
-            station.y = circle.y - 25;
-        }
     }
-    var temp;
     function exhale() {
         // Add a new node to the station.
-        temp = new createjs.Shape();
-        temp.graphics.beginFill("Red")
+        exhaleTemp = new createjs.Shape();
+        exhaleTemp.graphics.beginFill("Red")
             .drawCircle(0, 0, 5);
-        return temp;
+        return exhaleTemp;
     }
     function move_child() {
         if (!node) {
             node = nodes.shift();
             node.x = station.x + rectsize + 10;
-            node.y = circle.y;
+            node.y = Math.floor(stage.canvas.width / 3);
             stage.addChild(node);
         }
         else {
-            node.x = node.x + 5;
+            node.x = node.x + Math.floor(circleSpeed/2);
             if (node.x > stage.canvas.width) {
                 stage.removeChild(node);
                 node = null;
@@ -96,15 +99,12 @@
         if (within(circle.x, station.x, 10.1)) {
             // Fill the station
             if (within(circle.y, station.y, 35)) {
-                if (!node) {
-                    node = exhale();
-                    nodes.push(node);
-                }
+                nodes.push(exhale());
             }
         }
     }
     function move_main_circle() {
-        circle.x = circle.x + 5;
+        circle.x = circle.x + circleSpeed;
     }
     function pause() {
         if (paused) {
@@ -115,32 +115,48 @@
         }
     }
     // Update view
-    var node;
-    var nodes = [];
-    var paused = false;
+    
     document.onkeydown = checkKey;
     function checkKey(e) {
         e = e || window.event;
 
         if (e.keyCode == '38') {
-            circle.y = circle.y - 5;
+            circle.y = circle.y - circleSpeed;
         }
         else if (e.keyCode == '40') {
-            circle.y = circle.y + 5;
+            circle.y = circle.y + circleSpeed;
         }
         else if (e.keyCode == '37') {
-            circle.x = circle.x - 5;
+            circle.x = circle.x - circleSpeed;
         }
         else if (e.keyCode == '39') {
-            circle.x = circle.x + 5;
+            circle.x = circle.x + circleSpeed;
         }
 
     }
+    function updateCounter() {
+        counter = nodes.length;
+        if (newtext) {
+            stage.removeChild(newtext);
+            newtext = new createjs.Text(counter, "20px Arial", "black");
+            newtext.x = station.x + Math.ceil(rectsize/2);
+            newtext.y = station.y + Math.ceil(rectsize/2);
+            stage.addChild(newtext);
+        }
+        else {
+            newtext = new createjs.Text(counter, "20px Arial", "black");
+            newtext.x = station.x + Math.ceil(rectsize/2);
+            newtext.y = station.y + Math.ceil(rectsize/2);
+            stage.addChild(newtext);
+        }
+    }
+    var newtext;
     function update(event) {
         if (!paused) {
+
             stage.update(event); // important
             // Move blue circle and fill station if there's less than 10 nodes
-            // move_main_circle();
+            updateCounter();
             fillStation();
             insert_nodes();
             move_child();
