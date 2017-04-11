@@ -1,0 +1,7 @@
+MANIFEST.in
+README.txt
+MiniMaps.egg-info/PKG-INFO
+MiniMaps.egg-info/SOURCES.txt
+MiniMaps.egg-info/dependency_links.txt
+MiniMaps.egg-info/requires.txt
+MiniMaps.egg-info/top_level.txt

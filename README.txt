@@ -1,0 +1,1 @@
+MinimalMaps is a simple website that visualizes transit systems and their daily usage.
