@@ -56,10 +56,12 @@
     // Fill the station
     function fillStation() {
         if (within(circle.x, station.x)) {
-            station.scaleX = station.scaleX + .05;
-            station.scaleY = station.scaleY + .05;
-            station.y = station.y - 1;
-            circle.x = 0;
+            if (within(circle.y, station.y, 30)) {
+                station.scaleX = station.scaleX + .05;
+                station.scaleY = station.scaleY + .05;
+                station.y = station.y - 1;
+                circle.x = 0;
+            }
         }
         if (station.scaleX > 1.5) {
             station.scaleX = 1;
@@ -68,42 +70,81 @@
         }
     }
     var temp;
-    var nodes = [];
     function exhale() {
         // Add a new node to the station.
         temp = new createjs.Shape();
         temp.graphics.beginFill("Red")
-            .drawCircle(0, 
-            0, 
-            5
-        );
-        temp.x = station.x + .1;
-        temp.y = Math.floor(stage.canvas.width / 3);
-        stage.addChild(temp);
+            .drawCircle(0, 0, 5);
         return temp;
     }
-
-    // Update view
-    function update(event) {
-        circle.x = circle.x + 15;
-        circle.y = circle.y + 0;
-
-        // Fill the station
-        fillStation();
-
-        if (nodes.length < 5) {
-            nodes.push(exhale());            
+    function move_child() {
+        if (!node) {
+            node = nodes.shift();
+            node.x = station.x + rectsize + 10;
+            node.y = circle.y;
+            stage.addChild(node);
         }
-
-        if (nodes) {
-
-            node.x = node.x + 50;
-
+        else {
+            node.x = node.x + 5;
             if (node.x > stage.canvas.width) {
                 stage.removeChild(node);
+                node = null;
             }
         }
-        stage.update(event); // important
+    }
+    function insert_nodes() {
+        if (within(circle.x, station.x, 10.1)) {
+            // Fill the station
+            if (within(circle.y, station.y, 35)) {
+                if (!node) {
+                    node = exhale();
+                    nodes.push(node);
+                }
+            }
+        }
+    }
+    function move_main_circle() {
+        circle.x = circle.x + 5;
+    }
+    function pause() {
+        if (paused) {
+            paused = false;
+        }
+        else {
+            paused = true;
+        }
+    }
+    // Update view
+    var node;
+    var nodes = [];
+    var paused = false;
+    document.onkeydown = checkKey;
+    function checkKey(e) {
+        e = e || window.event;
+
+        if (e.keyCode == '38') {
+            circle.y = circle.y - 5;
+        }
+        else if (e.keyCode == '40') {
+            circle.y = circle.y + 5;
+        }
+        else if (e.keyCode == '37') {
+            circle.x = circle.x - 5;
+        }
+        else if (e.keyCode == '39') {
+            circle.x = circle.x + 5;
+        }
+
+    }
+    function update(event) {
+        if (!paused) {
+            stage.update(event); // important
+            // Move blue circle and fill station if there's less than 10 nodes
+            // move_main_circle();
+            fillStation();
+            insert_nodes();
+            move_child();
+        }
     }
 </script>
 <div>
