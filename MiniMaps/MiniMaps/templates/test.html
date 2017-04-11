@@ -10,13 +10,15 @@
     var rectsize = 50;
     var counter = 0;
     var storage = [];
+    var nodes = [];
+    var circleSpeed = 15;
+    var paused = false;
+    var emptying = false;
     var text;
     var counter;
     var node;
-    var nodes = [];
-    var circleSpeed = 10;
-    var paused = false;
     var exhaleTemp;
+    var newtext;
 
     function init() {
         // Set stage
@@ -69,7 +71,10 @@
     function fillStation() {
         if (within(circle.x, station.x)) {
             if (within(circle.y, station.y, 30)) {
+                // insert_nodes();
+                nodes.push(exhale());
                 circle.x = 0;
+                circle.y = Math.floor(stage.canvas.width / 3);
             }
         }
     }
@@ -88,7 +93,7 @@
             stage.addChild(node);
         }
         else {
-            node.x = node.x + Math.floor(circleSpeed/2);
+            node.x = node.x + 5;
             if (node.x > stage.canvas.width) {
                 stage.removeChild(node);
                 node = null;
@@ -96,12 +101,8 @@
         }
     }
     function insert_nodes() {
-        if (within(circle.x, station.x, 10.1)) {
-            // Fill the station
-            if (within(circle.y, station.y, 35)) {
-                nodes.push(exhale());
-            }
-        }
+        // Fill the station
+        
     }
     function move_main_circle() {
         circle.x = circle.x + circleSpeed;
@@ -115,7 +116,7 @@
         }
     }
     // Update view
-    
+    /*
     document.onkeydown = checkKey;
     function checkKey(e) {
         e = e || window.event;
@@ -133,7 +134,7 @@
             circle.x = circle.x + circleSpeed;
         }
 
-    }
+    }*/
     function updateCounter() {
         counter = nodes.length;
         if (newtext) {
@@ -150,15 +151,27 @@
             stage.addChild(newtext);
         }
     }
-    var newtext;
+    function emptyQueue(maxfill) {
+        if (!emptying) {
+            move_main_circle();
+        }
+        if (counter == maxfill) {
+            emptying = true;
+        }
+        if (emptying) {
+            if (counter == 0) {
+                emptying = false;
+            }
+        }
+    }
     function update(event) {
         if (!paused) {
 
             stage.update(event); // important
             // Move blue circle and fill station if there's less than 10 nodes
+            emptyQueue(50);
             updateCounter();
             fillStation();
-            insert_nodes();
             move_child();
         }
     }

@@ -7,6 +7,7 @@
         {% if not session.logged_in %}
             <a href="{{ url_for('login') }}">Log in</a>
         {% else %}
+            <a href="{{ url_for('test') }}">Play a little game</a>
             <a href="{{ url_for('logout') }}">Log out</a>
         {% endif %}
 

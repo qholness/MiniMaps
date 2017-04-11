@@ -47,12 +47,16 @@ def test():
 @MinimalMaps.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
-    print(MinimalMaps.config['USERNAME'])
+    db = get_db()
+    data = pd.read_sql('''SELECT username, [password] FROM users''', db)
+    data = {k : v for k,v in zip(data.username, data.password)}
+
     if request.method == 'POST':
-        if request.form['username'] != MinimalMaps.config['USERNAME']:
+        key = data.get(request.form['username'])
+        if not key:
             error = 'Invalid username'
-        elif request.form['password'] != MinimalMaps.config['PASSWORD']:
-            error = 'Invalid password'
+        elif request.form['password'] != key:
+            error = 'Wrong password'
         else:
             session['logged_in'] = True
             flash('You were logged in')
