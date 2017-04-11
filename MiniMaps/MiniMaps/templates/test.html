@@ -45,42 +45,69 @@
     }
     
     // within x pixels
-    function within(x,y) {
-        
-        if (Math.abs(x - y) < 10) {
+    function within(x,y,z=10) {
+        // x is within z of y
+        if (Math.abs(x - y) < z) {
             return true;
         }
-        
         return false;
     }
 
     // Fill the station
     function fillStation() {
         if (within(circle.x, station.x)) {
-            station.height = station.height + .05;
-            station.width = station.width + .05;
+            station.scaleX = station.scaleX + .05;
+            station.scaleY = station.scaleY + .05;
             station.y = station.y - 1;
             circle.x = 0;
             counter++;
         }
         if (station.scaleX > 1.5) {
-            station.height = rectsize;
-            station.width = rectsize;
+            station.scaleX = 1;
+            station.scaleY = 1;
+            station.y = circle.y - 25;
         }
     }
-    
+    var temp;
+    var nodes = [];
+    function exhale() {
+        // Add a new node to the station.
+        temp = new createjs.Shape();
+        temp.graphics.beginFill("Red")
+            .drawCircle(0, 
+            0, 
+            5
+        );
+        temp.x = station.x + .1;
+        temp.y = Math.floor(stage.canvas.width / 3);
+        stage.addChild(temp);
+        nodes.push(temp);
+        return temp;
+    }
+
+    // Update view
+    var index=0;
     function update(event) {
         circle.x = circle.x + 15;
         circle.y = circle.y + 0;
 
         // Fill the station
         fillStation();
-        console.log(station.scaleX);
-        if (circle.y > stage.canvas.height) {
-            circle.y = 100;
-        }
 
-        stage.update(event); // important!!
+        if (counter > 5) {
+            exhale();
+            if (nodes[0]) {
+                    nodes[0].x = nodes[0].x + 5;
+                if (nodes[0].x > stage.canvas.width) {
+                    stage.removeChild(nodes[0]);
+                }
+            }
+        }
+        if (counter > 10) {
+            nodes = [];
+            counter = 0;
+        }
+        stage.update(event); // important
     }
 </script>
 <div>
