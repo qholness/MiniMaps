@@ -1,11 +1,15 @@
 <!DOCTYPE html>
+{% block head %}
 <title>Minimal Maps</title>
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+<script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+{% endblock %}
 <div class=page>
     <h1>Minimal Maps</h1>
     <div class=metanav>
         {% if not session.logged_in %}
             <a href="{{ url_for('login') }}">Log in</a>
+            <a href="/register">Register</a>
         {% else %}
             <a href="{{ url_for('test') }}">Play a little game</a>
             <a href="{{ url_for('logout') }}">Log out</a>

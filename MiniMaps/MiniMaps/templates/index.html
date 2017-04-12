@@ -1,8 +1,14 @@
 {% extends 'base.html' %}
 {% block content %}
-    <ul>
-    {% for s in stations %}
-        <li>{{ s.stationname|safe }}</li>
-    {% endfor %}
-    </ul>
+    <h2>Welcome!</h2>
+    <form>
+        Network Capacity: <input type="text" name="Capacity" id="capacity" value=25><br>
+    </form>
+    <button onclick="init();">Begin Game</button>
+    <button onclick="pause();">Pause</button>
+    <canvas id='GameCanvas', width=800 height=560 style="border: solid 1px;">
+    </canvas>
+    <script src="/static/initGame.js"></script>
+    <script src="/static/gameUtils.js"></script>
+    <script src="/static/game.js"></script>
 {% endblock %}

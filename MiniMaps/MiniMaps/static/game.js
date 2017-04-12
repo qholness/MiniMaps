@@ -1,110 +1,116 @@
-var stage, circle, rect, stations, laststation, stationgraphics;
-var lat, lon, station;
-var rectsize = 10;
-stations = [];
-// 
+var nodes = []; // GLOBAL -- Used in initGame.js
+var circleSpeed = 15;
+var capacity = 10; // Capacity of box(es)
+var paused = false; // Paused state
+var emptying = false; // Emptying box(es) state
+var counter = 0;
+var node; // Temp pointer for nodes
+var trafficNode; // Traffic generator node
+var newtext; // Update box(es) text
 
 
 
-
-function init() {
-    stage = new createjs.Stage("demoCanvas");
-
-
-    // Set circle
-    circle = new createjs.Shape();
-    circle.graphics.beginFill("DeepSkyBlue")
-        .drawCircle(0, 0, 5);
-    circle.x = 100;
-    circle.y = 100;
-
-
-    // Set stations
-    {% for index, row in data.iterrows() %}
-        lat = {{ row['POINT_X'] }};
-        lon = {{ row['POINT_Y'] }};
-        station = new createjs.Shape();
-        stationgraphics = station.graphics;
-        stationgraphics.beginFill("Red")
-            .drawRect(0, 0, rectsize, rectsize);
-        stationgraphics.moveTo(lat, lon);
-        station.x = lat;
-        station.y = lon;
-        if (laststation) {
-            stationgraphics.setStrokeStyle(3);
-            stationgraphics.beginStroke('black');
-            stationgraphics.lineTo(laststation.x, laststation.y);
-            stationgraphics.endStroke();
+// Fill the station
+function fillStation() {
+    if (within(mainCircle.x, station.x)) {
+        if (within(mainCircle.y, station.y, 30)) {
+            // insert_nodes();
+            nodes.push(createTraffic());
+            mainCircle.x = 0;
+            mainCircle.y = Math.floor(stage.canvas.width / 3);
         }
-        stage.addChild(station);
-        stations.push(station);
-        laststation = station;
-    {% endfor %}
-
-
-
-    stage.addChild(circle);
-
-
-    // Event ticker
-    createjs.Ticker.addEventListener("tick", tick);
-
-
-    // Set ticker
-    createjs.Ticker.setFPS(60);
-
-
-    // Keyboard inputs
-    document.addEventListener('keydown', function(event) {
-        if(event.keyCode == 37) {
-            // Left
-            circle.x = circle.x - 5;
-        }
-        if(event.keyCode == 39) {
-            // Left
-            circle.x = circle.x + 5;
-        }
-        if(event.keyCode == 38) {
-            // Up
-            circle.y = circle.y - 5;
-        }
-        if(event.keyCode == 40) {
-            // Down
-            circle.y = circle.y + 5;
-        }
-    });
-}
-
-// Pause
-function pause(){
-    createjs.Ticker.setPaused(true);
-}
-
-// 
-function within(x, y, distance=5) {
-    if (Math.abs(x - y) < distance ) {
-        return true
     }
-    return false;
 }
-
-// s
-function findslope(x1,x2,y1,y2){
-    return (x2-x1)/(y2-y1);
+function createTraffic() {
+    // Add a new node to the station.
+    trafficNode = new createjs.Shape();
+    trafficNode.graphics.beginFill("Red")
+        .drawCircle(0, 0, 5);
+    return trafficNode;
 }
-
-
-function tick(event) {
-
-    stage.update(event); // important!!
-    
-    // Remove nodes
-    /*for (var i=0; i < stations.length; i++) {
-        station = stations[i];
-        if (within(xpos, station.x) && within(ypos, station.y)) {
-            stations.splice(i, 1, station);
-            stage.removeChild(stations[i]);
-            console.log("Ding");
+function move_child() {
+    // Move child node off screen
+    if (!node) {
+        node = nodes.shift();
+        node.x = station.x + rectsize + 10;
+        node.y = Math.floor(stage.canvas.width / 3);
+        stage.addChild(node);
+    }
+    else {
+        node.x = node.x + 5;
+        node.y = node.y + Math.sin(node.y) * 6;
+        if (node.x > stage.canvas.width) {
+            stage.removeChild(node);
+            node = null;
         }
-    }*/
+    }
+}
+function insert_nodes() {
+    // Fill the station
+    
+}
+function move_main_circle(speed=circleSpeed) {
+    mainCircle.x = mainCircle.x + speed;
+}
+
+// Update view
+/*
+document.onkeydown = checkKey;
+function checkKey(e) {
+    e = e || window.event;
+
+    if (e.keyCode == '38') {
+        mainCircle.y = mainCircle.y - circleSpeed;
+    }
+    else if (e.keyCode == '40') {
+        mainCircle.y = mainCircle.y + circleSpeed;
+    }
+    else if (e.keyCode == '37') {
+        mainCircle.x = mainCircle.x - circleSpeed;
+    }
+    else if (e.keyCode == '39') {
+        mainCircle.x = mainCircle.x + circleSpeed;
+    }
+
+}*/
+function updateCounter() {
+    counter = nodes.length;
+    if (newtext) {
+        stage.removeChild(newtext);
+        newtext = new createjs.Text(counter + "|" + capacity, "16px Arial", "black");
+        newtext.x = station.x + 5;
+        newtext.y = station.y + 15;
+        stage.addChild(newtext);
+    }
+    else {
+        newtext = new createjs.Text(counter + "|" + capacity, "16px Arial", "black");
+        newtext.x = station.x + Math.ceil(rectsize/2);
+        newtext.y = station.y + Math.ceil(rectsize/2);
+        stage.addChild(newtext);
+    }
+}
+function emptyQueue(maxfill) {
+    if (!emptying) {
+        move_main_circle();
+    }
+    if (counter > maxfill) {
+        emptying = true;
+    }
+    if (emptying) {
+        if (counter == 0) {
+            emptying = false;
+        }
+        move_main_circle(1);
+    }
+}
+function update(event) {
+    capacity = parseInt(document.getElementById("capacity").value);
+    if (!paused) {
+        stage.update(event); // important
+        // Move blue circle and fill station if there's less than 10 nodes
+        emptyQueue(capacity);
+        updateCounter();
+        fillStation();
+        move_child();
+    }
 }

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h2>Register a new account</h2>
+    {% if error %}
+        <p class=error><strong>Error:</strong>{{ error }}
+    {% endif %}
+    {% for message in flashed_messages %}
+        <div>{{ message }}</div>
+    {% endfor %}
+    <form action="{{ url_for('submitRegistration') }}" method=post>
+        <dl>
+            <dt>Username:
+            <dd><input type="text" name=username>
+            <dt>Password:
+            <dd><input type="password" name=password>
+            <dd><input type="submit" name=Login>
+        </dl>
+    </form>
+{% endblock %}

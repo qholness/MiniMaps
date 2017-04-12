@@ -2,52 +2,78 @@ from __init__ import MinimalMaps
 from flask import request, session, g, redirect, url_for, abort, render_template, flash
 from dbtools import *
 import pandas as pd
+import hashlib
+import base64
+import uuid
+
+
+
+
+def checkUserNameIntegrity(username):
+    # Some error checks...
+    return username
+
+
+def encodePassword(password):
+    '''Hash and salt password'''
+    t_sha = hashlib.sha512()
+    password = str.encode(password)
+    salt = base64.urlsafe_b64encode(uuid.uuid4().bytes)
+    t_sha.update(password + salt)
+    hashedpassword = base64.urlsafe_b64encode(t_sha.digest())
+    return hashedpassword
+
+
+
+
+# def decodePassword(password):
+#     t_sha = hashlib.sha512()
+#     password = str.encode(password)
+#     salt = base64.urlsafe_b64encode(uuid.uuid4().bytes)
+#     t_sha.update(password + salt)
+#     hashedpassword = base64.urlsafe_b64encode(t_sha.digest())
+#     return hashedpassword
+
+
+
 
 @MinimalMaps.route('/')
 def index():
+    return render_template('index.html')
+
+
+@MinimalMaps.route('/submit_reg', methods=['POST'])
+def submitRegistration():
     db = get_db()
-    cur = db.execute('''SELECT * FROM stations''')
-    stations = cur.fetchall()
-    return render_template('index.html', 
-    stations=stations
-    )
+    password = encodePassword(request.form['password']) # hash password with salt
+    db.execute('''INSERT INTO users (username, [password]) VALUES (?, ?)''',
+        [request.form['username'], password])
+    db.commit()
+    flash('You have registered')
+    return redirect(url_for('login'))
+
+
+
+@MinimalMaps.route('/register', methods=['POST', 'GET'])
+def register():
+    if session.get('logged_in'):
+        return redirect(url_for('test'))
+    return render_template('register.html')
 
 
 @MinimalMaps.route('/testpost')
 def test():
     if not session.get('logged_in'):
         abort(401)
-    db = get_db()
-    data = pd.read_sql('''SELECT * FROM cta_buses''', db)[:1000]
-
-    # Normalize lat and lon
-    data['POINT_X'] = data['POINT_X'].astype(float)
-    data['POINT_Y'] = data['POINT_Y'].astype(float)
-
-    meanx = data.POINT_X.mean()
-    meany = data.POINT_Y.mean()
-    sdevx = data.POINT_X.std()
-    sdevy = data.POINT_Y.std()
-
-    normalize = lambda value, mean, sdev: (value - mean)/sdev
-
-    data['POINT_X'] = [normalize(_, meanx, sdevx) for _ in data['POINT_X']]
-    data['POINT_Y'] = [normalize(_, meany, sdevy) for _ in data['POINT_Y']]
-
-    xmulpt = 720 / max(data.POINT_X)
-    ymulpt = 480 / max(data.POINT_Y)
-
-    data['POINT_X'] = [abs(_) * xmulpt for _ in data['POINT_X']]
-    data['POINT_Y'] = [abs(_) * ymulpt for _ in data['POINT_Y']]
-
-    flash('Added data!')
-    return render_template('test.html', data=data)
+    return render_template('test.html')
 
 
 @MinimalMaps.route('/login', methods=['GET', 'POST'])
 def login():
+    '''User login page'''
     error = None
-    db = get_db()
+    db = get_db() # Establish database connection
+    
     data = pd.read_sql('''SELECT username, [password] FROM users''', db)
     data = {k : v for k,v in zip(data.username, data.password)}
 
@@ -60,7 +86,7 @@ def login():
         else:
             session['logged_in'] = True
             flash('You were logged in')
-            return redirect(url_for('test'))
+            return redirect(url_for('index'))
 
     return render_template('login.html', error=error)
 
