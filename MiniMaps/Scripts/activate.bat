@@ -1,5 +1,5 @@
 @echo off
-set "VIRTUAL_ENV=C:\Users\qholn\Desktop\MiniMaps\MiniMaps"
+set "VIRTUAL_ENV=C:\Users\quent\Desktop\MinimalMaps\MiniMaps"
 
 if defined _OLD_VIRTUAL_PROMPT (
     set "PROMPT=%_OLD_VIRTUAL_PROMPT%"
