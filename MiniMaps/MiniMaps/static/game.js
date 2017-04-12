@@ -21,6 +21,7 @@ function fillStation() {
         }
     }
 }
+
 function createTraffic() {
     // Add a new node to the station.
     trafficNode = new createjs.Shape();
@@ -28,6 +29,7 @@ function createTraffic() {
         .drawCircle(0, 0, 5);
     return trafficNode;
 }
+
 function move_child() {
     // Move child node off screen
     if (!node) {
@@ -45,50 +47,59 @@ function move_child() {
         }
     }
 }
+
 function insert_nodes() {
     // Fill the station
     
 }
+
 function move_main_circle(speed=circleSpeed) {
     mainCircle.x = mainCircle.x + speed;
+    if (mainCircle.x > stage.canvas.width + 10) {
+        mainCircle.x = 0;
+    }
 }
 
-// Update view
-/*
-document.onkeydown = checkKey;
-function checkKey(e) {
-    e = e || window.event;
+// Move main node with arrow keys
+// document.onkeydown = checkKey;
+// function checkKey(e) {
+//     e = e || window.event;
 
-    if (e.keyCode == '38') {
-        mainCircle.y = mainCircle.y - circleSpeed;
-    }
-    else if (e.keyCode == '40') {
-        mainCircle.y = mainCircle.y + circleSpeed;
-    }
-    else if (e.keyCode == '37') {
-        mainCircle.x = mainCircle.x - circleSpeed;
-    }
-    else if (e.keyCode == '39') {
-        mainCircle.x = mainCircle.x + circleSpeed;
-    }
-
-}*/
+//     if (e.keyCode == '38') {
+//         mainCircle.y = mainCircle.y - circleSpeed;
+//     }
+//     else if (e.keyCode == '40') {
+//         mainCircle.y = mainCircle.y + circleSpeed;
+//     }
+//     else if (e.keyCode == '37') {
+//         mainCircle.x = mainCircle.x - circleSpeed;
+//     }
+//     else if (e.keyCode == '39') {
+//         mainCircle.x = mainCircle.x + circleSpeed;
+//     }
+// }
+var inputText;
 function updateCounter() {
     counter = nodes.length;
+    inputText = emptying ? 
+        "Emptying: " + counter + "|" + capacity 
+        : counter + "|" + capacity
+    ;
     if (newtext) {
         stage.removeChild(newtext);
-        newtext = new createjs.Text(counter + "|" + capacity, "16px Arial", "black");
-        newtext.x = station.x + 5;
-        newtext.y = station.y + 15;
+        newtext = new createjs.Text(inputText, "16px Arial", "black");
+        newtext.x = station.x;
+        newtext.y = station.y - 16;
         stage.addChild(newtext);
     }
     else {
-        newtext = new createjs.Text(counter + "|" + capacity, "16px Arial", "black");
-        newtext.x = station.x + Math.ceil(rectsize/2);
-        newtext.y = station.y + Math.ceil(rectsize/2);
+        newtext = new createjs.Text(inputText, "16px Arial", "black");
+        newtext.x = station.x;
+        newtext.y = station.y - 16;
         stage.addChild(newtext);
     }
 }
+
 function emptyQueue(maxfill) {
     if (!emptying) {
         move_main_circle();
@@ -97,14 +108,44 @@ function emptyQueue(maxfill) {
         emptying = true;
     }
     if (emptying) {
-        if (counter == 0) {
+        if (counter < maxfill ) {
             emptying = false;
         }
-        move_main_circle(1);
+        move_main_circle(Math.floor(tempSpeed/2));
     }
+    return emptying;
 }
+
+var tempSpeed, 
+    tempCapacity, 
+    tempEmpty;
+
 function update(event) {
-    capacity = parseInt(document.getElementById("capacity").value);
+    tempCapacity = parseInt(document.getElementById("capacity").value);;
+    tempSpeed - parseInt(document.getElementById("speed").value);
+
+    if (parseInt(document.getElementById("speed").value)) {
+        tempSpeed = parseInt(document.getElementById("speed").value);
+        if (tempSpeed > 0 && tempSpeed < 50) {
+            circleSpeed = tempSpeed;
+        }
+    }
+    if (parseInt(document.getElementById("capacity").value)) {
+        if (tempCapacity > 0 && tempCapacity < 1000) {
+            capacity = parseInt(document.getElementById("capacity").value);
+        }
+    }
+
+    //Control emptying. Needs some more thought
+    // if (parseInt(document.getElementById("empty").value)) {
+    //     emptying = true;
+    // }
+    // else {
+    //     if (!emptyQueue) {
+    //         emptying = false;
+    //     }
+    // }
+
     if (!paused) {
         stage.update(event); // important
         // Move blue circle and fill station if there's less than 10 nodes
