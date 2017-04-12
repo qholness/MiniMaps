@@ -4,4 +4,4 @@ threadsafe: true
 
 handlers:
 - url: /.*
-  script: /MiniMaps/MiniMaps/run.app
+  script: /MiniMaps/MiniMaps/run.py
