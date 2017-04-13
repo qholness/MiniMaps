@@ -1,16 +1,11 @@
-import os
+# import os
 from flask import Flask
-import flask_migrate
-import flask_sqlalchemy
+# import flask_migrate
+# import flask_sqlalchemy
 
 MinimalMaps = Flask(__name__) # Create MinimalMapslication instance
 MinimalMaps.config.from_object(__name__)
 MinimalMaps.config.update(dict(
-    DATABASE=os.path.join(MinimalMaps.root_path + '/data/database.db'),
-    SECRET_KEY='somekeytohash',
-    USERNAME='admin',
-    PASSWORD='admin'
+    DATABASE=os.path.join(MinimalMaps.root_path + '/data/database.db')
     )
 )
-
-print(MinimalMaps.config['DATABASE'])

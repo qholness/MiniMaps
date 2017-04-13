@@ -44,11 +44,14 @@ def index():
 
 @MinimalMaps.route('/submit_reg', methods=['POST'])
 def submitRegistration():
-    db = get_db()
-    password = encodePassword(request.form['password']) # hash password with salt
-    db.execute('''INSERT INTO users (username, [password]) VALUES (?, ?)''',
-        [request.form['username'], password])
-    db.commit()
+    # Registration confirmation...
+    
+    
+    # db = get_db()
+    # password = encodePassword(request.form['password']) # hash password with salt
+    # db.execute('''INSERT INTO users (username, [password]) VALUES (?, ?)''',
+    #     [request.form['username'], password])
+    # db.commit()
     flash('You have registered')
     return redirect(url_for('login'))
 
