@@ -1,3 +1,4 @@
+import os
 from flask import Flask
 import flask_migrate
 import flask_sqlalchemy
