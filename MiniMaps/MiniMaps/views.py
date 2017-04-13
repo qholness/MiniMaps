@@ -76,21 +76,28 @@ def test():
 def login():
     '''User login page'''
     error = None
+    username, password = None, None
+    combo = None
     db = get_db() # Establish database connection
     
-    data = pd.read_sql('''SELECT username, [password] FROM users''', db)
-    data = {k : v for k,v in zip(data.username, data.password)}
+    data = db.execute('''SELECT username, [password] FROM users''') # Handle logins better please. I don't want to expose anything more than necessary...
+    
 
     if request.method == 'POST':
-        key = data.get(request.form['username'])
-        if not key:
-            error = 'Invalid username'
-        elif request.form['password'] != key:
-            error = 'Wrong password'
-        else:
-            session['logged_in'] = True
-            flash('You were logged in')
-            return redirect(url_for('index'))
+        combo = data.fetchone() # Brute force check login
+        while combo:
+            username, password = combo
+            checkname = request.form['username']
+            checkpass = request.form['password']
+            if checkname == username:
+                if checkpass == password:
+                    session['logged_in'] = True
+                    flash('Logged in')
+                    return redirect(url_for('index'))
+                else:
+                    error = 'Incorrect password'
+            combo = data.fetchone()
+        error = 'Invalid username'
 
     return render_template('login.html', error=error)
 
