@@ -10,6 +10,7 @@ MinimalMaps.config.update(dict(
     DATABASE=os.path.join(dbPath),
     SECRET_KEY='tempDevConfig',
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
+    SQLALCHEMY_DATABASE_URI=dbPath
     )
 )
 

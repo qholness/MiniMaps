@@ -1,6 +1,7 @@
 from MiniMaps.MiniMaps import MinimalMaps
 from sqlite3 import dbapi2 as sqlite3
 from flask import g
+from MiniMaps.MiniMaps import database
 import sqlalchemy as sql
 
 
@@ -15,7 +16,6 @@ def init_db():
 
 def connect_db():
     engine = sql.create_engine(MinimalMaps.config['DATABASE'])
-    print(engine)
     connection = engine.connect()
     connection.row_factory = sqlite3.Row
     return connection
