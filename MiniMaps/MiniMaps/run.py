@@ -1,5 +1,2 @@
-from __init__ import MinimalMaps
+from MiniMaps.MiniMaps import MinimalMaps
 import views
-
-
-# MinimalMaps.run(debug=True)

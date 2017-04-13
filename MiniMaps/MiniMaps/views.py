@@ -1,6 +1,7 @@
-from __init__ import MinimalMaps
-from flask import request, session, g, redirect, url_for, abort, render_template, flash
-from dbtools import *
+from MiniMaps.MiniMaps import MinimalMaps
+from flask import request, session, redirect, url_for, abort, render_template, flash
+from MiniMaps.MiniMaps.dbtools import *
+from MiniMaps.MiniMaps.models import *
 import pandas as pd
 import hashlib
 import base64
