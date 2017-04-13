@@ -7,7 +7,7 @@ MinimalMaps = Flask(__name__) # Create MinimalMapslication instance
 MinimalMaps.config.from_object(__name__)
 dbPath = 'sqlite:///MiniMaps/MiniMaps/data/database.db'
 MinimalMaps.config.update(dict(
-    DATABASE=os.path.join(dbPath),
+    DATABASE=os.path.join(MinimalMaps.root_path, dbPath),
     SECRET_KEY='tempDevConfig',
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
     SQLALCHEMY_DATABASE_URI=dbPath
