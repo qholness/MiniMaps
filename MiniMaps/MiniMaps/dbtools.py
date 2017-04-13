@@ -10,7 +10,7 @@ import sqlalchemy as sql
 def init_db():
     """Initializes the database."""
     db = get_db()
-    with MinimalMaps.open_resource('/data/schema.sql', mode='r') as f:
+    with MinimalMaps.open_resource('/MiniMaps/MiniMaps/data/schema.sql', mode='r') as f:
         db.cursor().executescript(f.read())
     db.commit()
 
