@@ -15,7 +15,7 @@ def init_db():
     db.commit()
 
 def connect_db():
-    engine = sql.create_engine(MinimalMaps.config['DATABASE'])
+    engine = sql.create_engine(MinimalMaps.config['SQLALCHEMY_DATABASE_URI'])
     connection = engine.connect()
     connection.row_factory = sqlite3.Row
     return connection

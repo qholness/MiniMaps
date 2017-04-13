@@ -5,12 +5,13 @@ from flask_migrate import Migrate
 
 MinimalMaps = Flask(__name__) # Create MinimalMapslication instance
 MinimalMaps.config.from_object(__name__)
-dbPath = 'sqlite:///MiniMaps/MiniMaps/data/database.db'
+engine_string = 'sqlite:///MiniMaps/MiniMaps/data/database.db'
+dbPath = '/MiniMaps/MiniMaps/data/database.db'
 MinimalMaps.config.update(dict(
     DATABASE=os.path.join(MinimalMaps.root_path, dbPath),
     SECRET_KEY='tempDevConfig',
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    SQLALCHEMY_DATABASE_URI=dbPath
+    SQLALCHEMY_DATABASE_URI=engine_string
     )
 )
 
