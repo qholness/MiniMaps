@@ -1,11 +1,12 @@
-from MiniMaps.MiniMaps import MinimalMaps
+from MiniMaps import MinimalMaps
+from MiniMaps.dbtools import *
+from MiniMaps.models import *
 from flask import request, session, redirect, url_for, abort, render_template, flash
-from MiniMaps.MiniMaps.dbtools import *
-from MiniMaps.MiniMaps.models import *
 import pandas as pd
 import hashlib
 import base64
 import uuid
+
 
 
 
@@ -40,6 +41,7 @@ def encodePassword(password):
 
 @MinimalMaps.route('/')
 def index():
+    
     return render_template('index.html')
 
 
@@ -60,16 +62,19 @@ def submitRegistration():
 
 @MinimalMaps.route('/register', methods=['POST', 'GET'])
 def register():
-    if session.get('logged_in'):
-        return redirect(url_for('test'))
-    return render_template('register.html')
+    if not session.get('logged_in'):
+        flash("Enter your credentials to crete an account")
+        return render_template('register.html')
+    else:
+        return redirect(url_for('index'))
 
 
-@MinimalMaps.route('/testpost')
+@MinimalMaps.route('/test')
 def test():
     if not session.get('logged_in'):
-        abort(401)
-    return render_template('test.html')
+        # abort(401)
+        return redirect(url_for('register'))
+    return render_template('index.html')
 
 
 @MinimalMaps.route('/login', methods=['GET', 'POST'])

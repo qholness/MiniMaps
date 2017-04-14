@@ -3,13 +3,14 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_bootstrap import Bootstrap
+# from utils.security import ts
 
 MinimalMaps = Flask(__name__) # Create MinimalMapslication instance
 MinimalMaps.config.from_object(__name__)
 
 
-engine_string = 'sqlite:///MiniMaps/MiniMaps/data/database.db'
-dbPath = '/MiniMaps/MiniMaps/data/database.db'
+engine_string = 'sqlite:///MiniMaps/data/database.db'
+dbPath = '/MiniMaps/data/database.db'
 
 
 MinimalMaps.config.update(dict(

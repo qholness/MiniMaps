@@ -1,4 +1,4 @@
-from MiniMaps.MiniMaps import database as db
+from MiniMaps import database as db
 
 
 
