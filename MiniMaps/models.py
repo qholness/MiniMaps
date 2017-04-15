@@ -24,27 +24,32 @@ class User(db.Model):
 
 
 
-class Venues(db.Model):
-    __tablename__ = 'venues'
+class Status(db.Model):
+    __tablename__ = 'client_status'
     id = db.Column(db.Integer, primary_key=True)
-    venue_name = db.Column(db.String(80), unique=True, nullable=False)
-    venueAddress = db.Column(db.String(), unique=False)
-    venueCity = db.Column(db.String(), unique=False)
-    venueState = db.Column(db.String(), unique=False)
-    venue_email = db.Column(db.String(120), unique=True, nullable=True)
-    latitude = db.Column(db.String(), unique=False, nullable=True)
-    longitude = db.Column(db.String(), unique=False, nullable=True)
+    status = db.Column(db.String, unique=True, nullable=False)
 
-    def __init__(self, venue_name, venue_email, venueAddress, 
-    venueCity, venueState, latitude, longitude):
-        self.venue_name = venue_name
-        self.venue_email = venue_email
-        self.venueAddress = venueAddress
-        self.venueCity = venueCity
-        self.venueState = venueState
-        self.latitude = latitude
-        self.longitude = longitude
-        self.image_url = image_url
+    def __init__(self, status):
+        statii = ('scripting', 'cleaning', 'importing', 'import_complete', 'on_hold','') # list of statuses
+        self.status = status if status in statii else None
+
+
+
+class Clients(db.Model):
+    __tablename__ = 'clients'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), unique=True, nullable=False)
+    import_url = db.Column(db.String(), unique=False)
+    instance_url = db.Column(db.String(), unique=False)
+    assignee = db.Column(db.String())
+    status = db.Column(db.String())
+    
+    def __init__(self, name, import_url, instance_url, assignee):
+        self.name = name
+        self.import_url = import_url
+        self.instance_url = instance_url
+        self.assignee = assignee
+        self.status = status
 
     def __repr__(self):
         return '<User %r' % self.username

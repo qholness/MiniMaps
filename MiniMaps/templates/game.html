@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+
+
+
+{% block content %}
+
+<div>
+    <form>
+        Network Capacity: <input type="text" id="capacity" value=25>
+        Input Speed: <input type="text" id="speed" value=15>
+        <!--Empty Network: <input type="text" id="empty" value=0>-->
+    </form>
+    <button onclick="init();">Begin Game</button>
+    <button onclick="pause();">Pause</button>
+    <canvas id='GameCanvas', width=800 height=560 style="border: solid 1px;"></canvas>
+    <script src="/static/initGame.js"></script>
+    <script src="/static/gameUtils.js"></script>
+    <script src="/static/game.js"></script>
+</div>
+{% endblock %}

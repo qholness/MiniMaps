@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h2>Login</h2>
+    {% if error %}
+        <p class=error><strong>Error:</strong>{{ error }}
+    {% endif %}
+    <form action="{{ url_for('update_client') }}" method=post>
+        <dl>
+            <dt>Client Name: <!-- Drop box... Here-->
+            <dd><select name=client>
+                    <option value="">Select A Client</option>
+                {% for _ in clients %}
+                    <option value="{{ _ }}">{{ _ }}</option>
+                {% endfor %}
+            </select>
+            <dt>Status:
+            <dd><select name=status>
+                    <option value="">Select A Status</option>
+                    {% for _ in statii %}
+                        <option value="{{ _ }}">{{ _ }}</option>
+                    {% endfor %}
+                </select>
+            <dd><input type="submit" name=Login>
+        </dl>
+    </form>
+{% endblock %}

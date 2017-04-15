@@ -1,8 +1,8 @@
 
 <!DOCTYPE html>
 {% block head %}
-    <title>Minimal Maps</title>
-    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+    <title>Briostack Dashboard</title>
+    <link rel=stylesheet type=text/css href="/static/bootstrap/css/bootstrap.min.css/">
     <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
 {% endblock %}
 
@@ -10,15 +10,19 @@
 
 
 <div>
-    <h1>Minimal Maps</h1>
+    <h1>Briostack Dashboard</h1>
     {% block navbar %}
-        <div class="navbar navbar-fixed-top">
+        <div class="navbar">
             <a href="{{ url_for('index') }}">Home</a>
             {% if not session.logged_in %}
                 <a href="{{ url_for('login') }}">Log in</a>
                 <a href="/register">Register</a>
             {% else %}
-                <a href="{{ url_for('test') }}">Play a little game</a>
+                <a href="{{ url_for('client_statuses')  }}">Client Status</a>
+                <a href="{{ url_for('submit_client_form') }}">Create New Client</a>
+                <a href="{{ url_for('update_client_form') }}">Update A Client</a>
+                <a href="{{ url_for('submit_sql') }}">Submit SQL</a>
+                <a href="{{ url_for('game') }}">Play a little game</a>
                 <a href="{{ url_for('logout') }}">Log out</a>
             {% endif %}
         {% for message in get_flashed_messages() %}

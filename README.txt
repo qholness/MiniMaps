@@ -1,8 +1,7 @@
 MinimalMaps is a simple website that visualizes transit systems and their daily usage.
 
-
---- Theories
------- Inequality if a geospatial market positioning problem
------- Real lives simulation
------- System flow game
------- Statistical research
+Objective
+--- Create a dashboard for data migration team
+--- Simplify notification process from migration to CS by:
+        Minimizing the number of steps necessary to update job statuses
+        Centralize our segment of reporting and making navigation much easier.

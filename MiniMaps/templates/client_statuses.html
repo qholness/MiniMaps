@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h2 id='status'>Client Statuses</h2>
+    {% if error %}
+        <p class=error><strong>Error:</strong>{{ error }}
+    {% endif %}
+
+
+
+    <!--Client table-->
+    <table>
+        <thead>
+            <td>Client</td>
+            <td>Status</td>
+        </thead>
+        {% for index, row in data.iterrows() %}
+            <tr>
+                <td>{{ row['name'] }}</td>
+                <td>{{ row['status'] if row['status'] else "" }}</td>
+                <td><a href="{{ row['instance_url'] if row['instance_url'] else url_for('client_statuses') }}">
+                    {{ row['instance_url'] if row['instance_url'] else "" }}</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    
+    <script>
+        // Refresh the page every 15 minutes
+        var refreshRate = 15 * 60; // 15 minutes;
+        var seconds = 0;
+        function sleep(ms) {
+            var status;
+            status = document.getElementById('status');
+            status.innerHTML = 'Client Statuses - Refresh in ' + (refreshRate - seconds);
+            seconds++;
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        function seconds(s) {
+            // Convert milliseconds to seconds
+            return s * 1000;
+        }
+        async function refresh() {
+            await sleep(seconds(refreshRate));
+            location.reload(false);
+        }
+        refresh();
+    </script>
+{% endblock %}
