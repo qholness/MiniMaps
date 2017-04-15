@@ -18,7 +18,7 @@
             <a href="{{ url_for('client_statuses')  }}">Client Status</a>
             {% if not session.logged_in %}
                 <a href="{{ url_for('login') }}">Log in</a>
-                {% comment %}<a href="/register">Register</a>{% endcomment %}
+                <!--<a href="/register">Register</a>-->
             {% else %}
                 <a href="{{ url_for('my_clients')  }}">My Clients</a>
                 <a href="{{ url_for('submit_client_form') }}">Create New Client</a>
