@@ -10,15 +10,17 @@
 
 
 <div>
-    <h1>Briostack Dashboard</h1>
+    {% set user = session.get('user', None) %}
+    <h1>Briostack Dashboard {{ " - {}".format(user) if user else "" }}</h1>
     {% block navbar %}
         <div class="navbar">
             <a href="{{ url_for('index') }}">Home</a>
+            <a href="{{ url_for('client_statuses')  }}">Client Status</a>
             {% if not session.logged_in %}
                 <a href="{{ url_for('login') }}">Log in</a>
-                <a href="/register">Register</a>
+                {% comment %}<a href="/register">Register</a>{% endcomment %}
             {% else %}
-                <a href="{{ url_for('client_statuses')  }}">Client Status</a>
+                <a href="{{ url_for('my_clients')  }}">My Clients</a>
                 <a href="{{ url_for('submit_client_form') }}">Create New Client</a>
                 <a href="{{ url_for('update_client_form') }}">Update A Client</a>
                 <a href="{{ url_for('submit_sql') }}">Submit SQL</a>

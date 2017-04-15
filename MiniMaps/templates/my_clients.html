@@ -23,7 +23,9 @@
                 <td><a href="{{ row['instance_url'] if row['instance_url'] else url_for('client_statuses') }}">
                     {{ row['instance_url'] if row['instance_url'] else "" }}</a>
                 </td>
-                <td>{{ row['assignee'] }}</td>
+                <td><a href="{{ row['import_url'] if row['import_url'] else url_for('client_statuses') }}">
+                    {{ row['import_url'] if row['import_url'] else "" }}</a>
+                </td>
             </tr>
         {% endfor %}
     </table>
