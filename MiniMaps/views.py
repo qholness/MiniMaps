@@ -90,7 +90,7 @@ def submit_client():
     client = request.form['client_name'] # Grab client from form
     url = request.form['client_url'] if request.form['client_url'] else "https://{}.briostack.com".format(client)
     importUrl = request.form['client_import_url'] if request.form['client_import_url'] else "https://import.briostack.com/{}/webtools/control/main".format(client)
-    db.execute('''INSERT INTO clients ([name], [import_url], [instance_url], []) VALUES (?, ?, ?)''',
+    db.execute('''INSERT INTO clients ([name], [import_url], [instance_url]) VALUES (?, ?, ?)''',
         [client, url, importUrl]
     )
     db.close()
