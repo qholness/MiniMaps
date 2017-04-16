@@ -7,7 +7,10 @@
     
     <!--Viewport adjustments for mobile friendliness-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    
+    <!--JQuery-->
+    <script type="text/javascript" src="/static/jquery-3.2.1.slim.min.js"></script>
+    
     <!--Boostrap-->
     <link rel=stylesheet type=text/css href="/static/bootstrap/css/bootstrap.min.css">
     <link rel=stylesheet type=text/css href="/static/bootstrap/css/bootstrap-responsive.min.css">
@@ -47,9 +50,9 @@
         {% elif 'Fail' in message %}    alert-danger
         {% elif 'Info' in message %}    alert-info
         {% elif 'Warning' in message %}    alert-warning
-        {% endif %}alert-dismissable" >
-            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+        {% endif %} alert-dismissable">
             {{ message }}
+            <a class="close" data-dismiss="alert" aria-label="close">&times;</a>
         </div>
     {% endfor %}
     </div>
