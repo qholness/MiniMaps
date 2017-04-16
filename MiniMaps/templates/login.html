@@ -1,16 +1,15 @@
 {% extends 'base.html' %}
 {% block content %}
     <h2>Login</h2>
-    {% if error %}
-        <p class=error><strong>Error:</strong>{{ error }}
-    {% endif %}
+    
+    <!--Login Form-->
     <form action="{{ url_for('login_user') }}" method=post>
         <dl>
             <dt>Username:
             <dd><input type="text" name=username>
             <dt>Password:
             <dd><input type="password" name=password>
-            <dd><input type="submit" name=Login value='Submit'>
+            <br><br><dd><input class=btn type="submit" value=Login>
         </dl>
     </form>
 {% endblock %}

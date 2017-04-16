@@ -1,52 +1,70 @@
 {% extends 'base.html' %}
 {% block content %}
-    <h2 id='status'>Client Statuses</h2>
-    {% if error %}
-        <p class=error><strong>Error:</strong>{{ error }}
-    {% endif %}
-    {% for message in flashed_messages %}
-        <div>{{ message }}</div>
-    {% endfor %}
-
-
-
+    <div>Live Count: <span style="color: green;">{{ live_count }}</span></div>
+    <hr>
     <!--Client table-->
-    <table>
+    <table id=BrioClientTable>
         <thead>
-            <td>Client</td>
-            <td>Status</td>
+            <h3>Client Statuses</h3>
+            <th>Client</th>
+            <th>Status</th>
+            <th>Instance URL</th>
+            <th>Assigned To</th>
+            <th>Estimated Completion</th>
+            <th>Notes</th>
+            <th>Created</th>
+            <th>Updated</th>
+            <th>Queue Days</th>
+            <th>Update Days</th>
         </thead>
+        
         {% for index, row in data.iterrows() %}
+            {% set name = row['name'] %}
+            {% set status = row['status'] %}
+            {% set instance_url = row['instance_url'] %}
+            {% set assignee = row['assignee'] %}
+            {% set eta = row['estimated_completion'] %}
+            {% set notes = row['import_notes'] %}
+            {% set created = row['created_timestamp'] %}
+            {% set updated = row['updated_timestamp'] %}
+            {% set queue_days = row['queue_days'] %}
+            {% set update_days = row['update_days'] %}
+
+            {% set backgroundColor = status_colors.get(status, 'white') %}
+            {% set textColor = text_colors[status] %}
             <tr>
-                <td>{{ row['name'] }}</td>
-                <td>{{ row['status'] if row['status'] else "" }}</td>
-                <td><a href="{{ row['instance_url'] if row['instance_url'] else url_for('client_statuses') }}">
-                    {{ row['instance_url'] if row['instance_url'] else "" }}</a>
+                <td>{{ name }}</td>
+                <td style="background-color: {{ backgroundColor }};
+                    color: {{ textColor }};">
+                    {{ status if status else "" }}
                 </td>
-                <td>{{ row['assignee'] }}</td>
+                <td>
+                    <a href="{{ instance_url if instance_url else url_for('client_statuses') }}">
+                    {{ instance_url if instance_url else "" }}</a>
+                </td>
+                <td>{{ assignee if assignee else "" }}</td>
+                <td>{{ eta if eta else "" }}</td>
+                <td>{{ notes if notes else ""}}</td>
+                <td>{{ created if created else "" }}</td>
+                <td>{{ updated if updated else "" }}</td>
+                <td>{{ queue_days if queue_days else "" }}</td>
+                <td>{{ update_days if update_days else "" }}</td>
             </tr>
         {% endfor %}
     </table>
-    
+
+
+
+    <!--Auto refresh page-->
     <script>
-        // Refresh the page every 15 minutes
-        var refreshRate = 15 * 60; // 15 minutes;
-        var seconds = 0;
-        function sleep(ms) {
-            var status;
-            status = document.getElementById('status');
-            status.innerHTML = 'Client Statuses - Refresh in ' + (refreshRate - seconds);
-            seconds++;
-            return new Promise(resolve => setTimeout(resolve, ms));
-        }
-        function seconds(s) {
-            // Convert milliseconds to seconds
-            return s * 1000;
-        }
-        async function refresh() {
-            await sleep(seconds(refreshRate));
-            location.reload(false);
-        }
-        refresh();
+        $(document).ready(function() {
+            $('#BrioClientTable').DataTable();
+        })
     </script>
+    <script src="/static/autoRefresh.js"></script>
+    <style>
+        th {
+            font-size: 16px;
+        }
+    </style>
 {% endblock %}

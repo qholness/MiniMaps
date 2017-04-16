@@ -1,26 +1,37 @@
 {% extends 'base.html' %}
+
+
 {% block content %}
-    <h2>Login</h2>
-    {% if error %}
-        <p class=error><strong>Error:</strong>{{ error }}
-    {% endif %}
-    <form action="{{ url_for('update_client') }}" method=post>
+    <h2>Update Client Status</h2>
+    
+    <form action="{{ url_for('update_client') }}" method=POST>
         <dl>
             <dt>Client Name: <!-- Drop box... Here-->
             <dd><select name=client>
-                    <option value="">Select A Client</option>
+                    <option value="">Select Client</option>
                 {% for _ in clients %}
                     <option value="{{ _ }}">{{ _ }}</option>
                 {% endfor %}
             </select>
             <dt>Status:
             <dd><select name=status>
-                    <option value="">Select A Status</option>
+                    <option value="">Select Status</option>
                     {% for _ in statii %}
                         <option value="{{ _ }}">{{ _ }}</option>
                     {% endfor %}
                 </select>
-            <dd><input type="submit" name=Login>
+            <dt>Estimated Completion
+            <dd><input type=text name="estimated_completion">
+            <dt>Notes
+            <dd><input id=updateField type=text name="import_notes" value="">
+            <br><br><dd><input class=btn type="submit" value=Submit>
         </dl>
     </form>
+    <style>
+        #updateField {
+            width: 720px;
+            padding: 20px, 10px;
+            line-height: 28px;
+        }
+    </style>
 {% endblock %}

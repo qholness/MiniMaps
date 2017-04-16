@@ -1,54 +1,55 @@
 {% extends 'base.html' %}
 {% block content %}
-    <h2 id='status'>Client Statuses</h2>
-    {% if error %}
-        <p class=error><strong>Error:</strong>{{ error }}
-    {% endif %}
-    {% for message in flashed_messages %}
-        <div>{{ message }}</div>
-    {% endfor %}
-
-
+    <h2 id='status'>Client Status</h2>
+    <hr>
 
     <!--Client table-->
-    <table>
+    <table id=MyClients>
+        <script>
+            $(document).ready(function() {
+                $('#MyClients').DataTable();
+            });
+        </script>
         <thead>
             <td>Client</td>
             <td>Status</td>
+            <td>Instance URL</td>
+            <td>Import URL</td>
+            <td>Estimated Time</td>
+            <td>Notes</td>
+            <td>Created</td>
+            <td>Updated</td>
         </thead>
         {% for index, row in data.iterrows() %}
+            {% set name = row['name'] %}
+            {% set status = row['status'] %}
+            {% set instance_url = row['instance_url'] %}
+            {% set import_url = row['import_url'] %}
+            {% set eta = row['estimated_completion'] %}
+            {% set notes = row['import_notes'] %}
+            {% set created = row['created_timestamp'] %}
+            {% set updated = row['updated_timestamp'] %}
+
+            {% set backgroundColor = status_colors.get(status, 'white') %}
+            {% set textColor = text_colors[status] %}
             <tr>
-                <td>{{ row['name'] }}</td>
-                <td>{{ row['status'] if row['status'] else "" }}</td>
-                <td><a href="{{ row['instance_url'] if row['instance_url'] else url_for('client_statuses') }}">
-                    {{ row['instance_url'] if row['instance_url'] else "" }}</a>
+                <td>{{ name }}</td>
+                <td style="background-color: {{ backgroundColor }};
+                    color: {{ textColor }};">
+                    {{ status if status else "" }}
                 </td>
-                <td><a href="{{ row['import_url'] if row['import_url'] else url_for('client_statuses') }}">
-                    {{ row['import_url'] if row['import_url'] else "" }}</a>
+                <td><a href="{{ instance_url if instance_url else url_for('client_statuses') }}">
+                    {{ instance_url if instance_url else "" }}</a>
                 </td>
+                <td><a href="{{ import_url if import_url else url_for('client_statuses') }}">
+                    {{ import_url if import_url else "" }}</a>
+                </td>
+                <td>{{ eta if eta else "" }}</td>
+                <td>{{ notes if notes else "" }}</td>
+                <td>{{ created if created else "" }}</td>
+                <td>{{ updated if updated else "" }}</td>
             </tr>
         {% endfor %}
     </table>
-    
-    <script>
-        // Refresh the page every 15 minutes
-        var refreshRate = 15 * 60; // 15 minutes;
-        var seconds = 0;
-        function sleep(ms) {
-            var status;
-            status = document.getElementById('status');
-            status.innerHTML = 'Client Statuses - Refresh in ' + (refreshRate - seconds);
-            seconds++;
-            return new Promise(resolve => setTimeout(resolve, ms));
-        }
-        function seconds(s) {
-            // Convert milliseconds to seconds
-            return s * 1000;
-        }
-        async function refresh() {
-            await sleep(seconds(refreshRate));
-            location.reload(false);
-        }
-        refresh();
-    </script>
+    <script src="/static/autoRefresh.js"></script>
 {% endblock %}

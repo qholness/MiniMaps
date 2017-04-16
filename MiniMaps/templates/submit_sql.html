@@ -1,14 +1,13 @@
 {% extends 'base.html' %}
 {% block content %}
     <h2>Execute SQL</h2>
-    {% if error %}
-        <p class=error><strong>Error:</strong>{{ error }}
-    {% endif %}
+    
+    <!--SQL Entry Form-->
     <form action="{{ url_for('execute_sql') }}" method=post>
         <dl>
             <dt>SQL:
             <dd><input type="text" name=sql>
-            <dd><input type="submit" name=submit>
+            <br><dd><input class=btn type="submit" value=Submit>
         </dl>
     </form>
 {% endblock %}

@@ -1,9 +1,8 @@
 {% extends 'base.html' %}
 {% block content %}
-    <h2>Login</h2>
-    {% if error %}
-        <p class=error><strong>Error:</strong>{{ error }}
-    {% endif %}
+    <h2>Submit a New Client to the Database</h2>
+
+    <!--Submit Form-->
     <form action="{{ url_for('submit_client') }}" method=post>
         <dl>
             <dt>Client Name:
@@ -12,7 +11,7 @@
             <dd><input type="text" name=client_url>
             <dt>Import URL:
             <dd><input type="text" name=client_import_url>
-            <dd><input type="submit" name=Login>
+            <br><dd><input class=btn type="submit" value=Submit>
         </dl>
     </form>
 {% endblock %}

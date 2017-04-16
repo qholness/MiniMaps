@@ -2,7 +2,6 @@ import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_bootstrap import Bootstrap
 # from utils.security import ts
 
 MinimalMaps = Flask(__name__) # Create MinimalMapslication instance
@@ -23,4 +22,3 @@ MinimalMaps.config.update(dict(
 
 database = SQLAlchemy(MinimalMaps)
 migrate = Migrate(MinimalMaps, database)
-Bootstrap(MinimalMaps)
