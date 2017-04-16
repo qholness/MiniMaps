@@ -8,24 +8,97 @@ import hashlib
 import base64
 import uuid
 import sys
+import random
 global today
 today = datetime.datetime.now()
 
 
 ################ Utils ################
-def check_login_status(redirect_url='login'):
+def check_login_status():
     '''Check to see if a user is logged in'''
-    if not session.get('logged_in'):
+    if not session.get('logged_in', None):
         
-        flash('You must be logged in to view this page')
-        return redirect(url_for(redirect_url))
+        flash('Info: You must be logged in to view this page')
+
+        return 1
 
 
-def setupPage():
-    '''Check login and setup database'''
-    check_login_status()
+@MinimalMaps.route('/change-password')
+def change_password():
+    '''Change a password'''
+    if check_login_status():
+        return redirect(url_for('login'))
+    
+    return render_template('change_password.html')
+
+
+@MinimalMaps.route('/execute-change-password', methods=['POST'])
+def execute_change_password():
+    '''Change a user password'''
+    if check_login_status():
+        return redirect(url_for('login'))
+    
+    # Get form data
+    old_password = request.form['oldPassword']
+    new_password = request.form['newPassword']
+    conf_password = request.form['newPassConf']
+
+    # Password field is blank
+    if not new_password:
+        flash("Fail: Password field cannot be blank")
+        return redirect(url_for('change_password'))
+    
+    # Password too short
+    if len(new_password) < 5:
+        flash("Warning: Password is too short ")
+        return redirect(url_for('change_password'))
+    
+    # Password too long
+    if len(new_password) > 64:
+        flash("Warning: Password is too long")
+        return redirect(url_for('change_password'))
+    
+    # Special characters
+    special_chars = '''}*'"{][]},./<>?\\|`~%^='''
+    for s in new_password:
+        if s in special_chars:
+            flash("Warning: {} is not allowed.".format(s))
+            return redirect(url_for('change_password'))
+
+    # Connect to database
     db = get_db()
-    return db
+    getpass = "SELECT [password] FROM users WHERE [username] = '{}'".format(session['user'])
+    checkPass = list(pd.read_sql(getpass, db).password)[0]
+
+    # Make sure old password is correct
+    if old_password != checkPass:
+        flash("Fail: Old password was incorrect")
+        return redirect(url_for('change_password'))
+    
+    # Check to see if passwords match
+    if new_password != conf_password:
+        flash("Warning: Passwords don't match")
+        return redirect(url_for('change_password'))
+
+    SQL = '''
+        UPDATE users
+        SET [password] = '{}'
+        WHERE [username] = '{}'
+        '''.format(new_password, session['user'])
+    
+    try:
+    
+        db.execute(SQL)
+        flash("Success: Password change was successful")
+        db.close()
+        return redirect(url_for('my_clients'))
+    
+    except:
+
+        flash("Failed to change password")
+        flash("Fail: {}".format(sys.exc_info()))
+        db.close()
+        return redirect(url_for('change_password'))
 
 
 def encodePassword(password):
@@ -69,16 +142,19 @@ def submit_sql():
 @MinimalMaps.route('/execute', methods=['POST'])
 def execute_sql():
     '''Execute the SQL statements'''
-    db = setupPage()
+    if check_login_status():
+        return redirect('login')
+    db = get_db()
+
     statements = request.form['sql'].split(';') # List of statements to execute
 
     for s in statements:
         s += ";" # Add an extra semicolon just in case...
         try:
             db.execute(s)
-            flash(s)
+            flash("Success: {}".format(s))
         except:
-            flash("{}".format(sys.exc_info()))
+            flash("Fail: {}".format(sys.exc_info()))
     db.close()
     return redirect(url_for('submit_sql'))
 
@@ -96,7 +172,10 @@ def get_colors(db):
 @MinimalMaps.route('/my-clients')
 def my_clients():
     '''View users clients. Only available to logged-in users'''
-    db = setupPage()
+    if check_login_status():
+        return redirect('login')
+    db = get_db()
+
     status_colors, text_colors = get_colors(db)
     
     client_data = pd.read_sql('''
@@ -137,13 +216,17 @@ def client_statuses():
     
     client_data['update_days'] = [(today - _).days if not pd.isnull(today - _) else "" 
         for _ in client_data['updated_timestamp']]
-
-    live_count = len(client_data[client_data.status == "Live"])
+    
+    counts = client_data.status.value_counts() # Counts of status types
     
     db.close()
 
+    titles = ['Dat Dashboard Tho', 'Briostack Client On-Boarding', 'Data Migration Dashboard',
+    'Data Junkies', 'Client Statuses']
+    title = titles.pop(random.randint(0, len(titles) - 1))
+
     return render_template('client_statuses.html', data=client_data, 
-        status_colors=status_colors, text_colors=text_colors, live_count=live_count)
+        status_colors=status_colors, text_colors=text_colors, title=title, counts=counts)
 
 
 
@@ -169,7 +252,10 @@ def clean_client_name(string):
 @MinimalMaps.route('/submit_client', methods=['POST'])
 def submit_client():
     '''Create a new client'''
-    db = setupPage() # Establish credintials and connection
+    if check_login_status(): # Establish credintials and connection
+        return redirect('login')
+    db = get_db()
+
     client = request.form['client_name'] # Grab client from form
     client = clean_client_name(client)
 
@@ -182,24 +268,25 @@ def submit_client():
             
             db.execute('''
             INSERT INTO clients 
-                ([name], [import_url], [instance_url], [created_timestamp], [updated_timestamp], [assignee]) 
-            VALUES (?, ?, ?, ?, ?, ?);''',
-                [client, instanceUrl, importUrl, timestamp, timestamp, session['user']]
+                ([name], [status], [instance_url], [import_url], [created_timestamp], [updated_timestamp], [assignee]) 
+            VALUES (?, ?, ?, ?, ?, ?, ?);''',
+                [client, "Open", instanceUrl, importUrl, timestamp, timestamp, session['user']]
             )
-
+            flash("Success importing")
+            
         except:
             
             flash('''Failed to submit "{}"'''.format(client))
-            flash("{}".format(sys.exc_info()))
+            flash("Failed: {}".format(sys.exc_info()))
             
             db.close()
             return redirect(url_for('submit_client_form'))
         
-        flash('Client submitted')
+        flash('Success: {} submitted'.format(client))
         db.close()
         return redirect(url_for('my_clients'))
     else:
-        flash('Client name required')
+        flash('Fail: Client name required')
         db.close()
         return redirect(url_for('submit_client_form'))
 
@@ -210,16 +297,19 @@ def submit_client():
 @MinimalMaps.route('/update_client_form')
 def update_client_form():
     '''Form for submitting a new client'''
-    db = setupPage()
+    if check_login_status():
+        return redirect('login')
+    db = get_db()
+
     
     statii = pd.read_sql('''
-    SELECT S.[status] 
-    FROM client_status AS S;''', db)
+    SELECT S.[id], S.[status] 
+    FROM client_status AS S;''', db).sort_values('id', ascending=True)
 
     clients = pd.read_sql('''
         SELECT C.[name] 
         FROM clients AS C
-        WHERE C.assignee='{}';'''.format(session['user']), db)
+        WHERE C.assignee='{}';'''.format(session['user']), db).sort_values('name', ascending=True)
     
     clients = list(clients.name) # List of clients associated with user
     statii = list(statii.status) # List of statuses to updates to
@@ -231,11 +321,11 @@ def update_client_form():
 def execute_updates(db, execution_string):
     try:
         db.execute(execution_string)
-        flash(execution_string)
+        flash("Success: {}".format(execution_string))
     except:
         # Flash messages
-        flash('''Failed to update "{}"'''.format(client))
-        flash("{}".format(sys.exc_info()))
+        flash('''Fail to update "{}"'''.format(client))
+        flash("Fail: {}".format(sys.exc_info()))
 
 
 def fix_input_string(string):
@@ -261,7 +351,10 @@ def update_client():
     est_completion = fix_input_string(request.form['estimated_completion'])
     timestamp = datetime.datetime.now().strftime('%D %T')
 
-    db = setupPage() # Connect to database
+    if check_login_status(): # Connect to database:
+        return redirect('login')
+    db = get_db()
+
         
     if client:
         update_status = '''UPDATE clients SET 
@@ -281,6 +374,10 @@ def update_client():
     return redirect(url_for('my_clients'))
 
 
+@MinimalMaps.route('/view-note')
+def full_note():
+    return request.args.get('note')
+
 
 
 ################ User registration (not working as of 4/15/2017) ################
@@ -288,11 +385,51 @@ def update_client():
 def register():
     '''Register a new user. NOT WORKING'''
     if not session.get('logged_in'):
-        flash("Enter your credentials to crete an account")
+        flash("Info: Enter your credentials to crete an account")
         return render_template('register.html')
     else:
         return redirect(url_for('index'))
 
+
+@MinimalMaps.route('/exchange_client')
+def exchange_clients():
+    '''Allow users to pick up or remove extra clients'''
+    if check_login_status():
+        return redirect('login')
+    db = get_db()
+
+    clients = list(pd.read_sql('''SELECT DISTINCT [name] from clients''', db)['name'])
+    users = list(pd.read_sql('''SELECT DISTINCT username from users''', db)['username'])
+    
+    return render_template('exchange_clients.html', clients=clients, users=users)
+
+
+@MinimalMaps.route('/execute-client-exchange', methods=['POST'])
+def execute_exchange():
+    '''Execute client exchange'''
+    giveTo = request.form['giveTo']
+    client = request.form['client']
+    SQL = '''
+        UPDATE clients
+        SET [assignee] = '{}'
+        WHERE
+            [name] = '{}'
+        '''.format(giveTo, client) 
+    if check_login_status():
+        return redirect('login')
+    db = get_db()
+
+    try:
+        db.execute(SQL)
+        flash("Success: Updated assignee of \"{}\" to {}".format(client, giveTo))
+        flash("Success: {}".format(SQL))
+    except:
+        flash("Fail: {}".format(SQL))
+        flash("Fail: {}".format(sys.exc_info()))
+    db.close()
+    return redirect(url_for('client_statuses'))
+
+    
 
 @MinimalMaps.route('/submit_reg', methods=['POST'])
 def submitRegistration():
@@ -341,13 +478,14 @@ def login_user():
                 # Login successful
                 session['logged_in'] = True
                 session['user'] = checkname
-                flash('Welcome {}'.format(checkname))
+                session['login_time'] = today
+                flash('Success: Welcome {}'.format(checkname))
                 db.close() # Close db connection
                 return redirect(url_for('my_clients')) # Redirect to my clients
             else:
-                flash('Incorrect password')
+                flash('Fail: Incorrect password')
         combo = data.fetchone() # grab the next one
-    flash('Invalid username') # Couldn't find user name
+    flash('Fail: Invalid username') # Couldn't find user name
     db.close() # Close db connection
     return redirect(url_for('login'))
 
@@ -355,9 +493,10 @@ def login_user():
 @MinimalMaps.route('/logout')
 def logout():
     '''Log user out'''
-    session.pop('logged_in', None)
     session.pop('user', None)
-    flash('You were logged out')
+    session.pop('logged_in', None)
+    session.pop('login_time', None)
+    flash('Success: You were logged out')
     return redirect(url_for('login'))
 
 

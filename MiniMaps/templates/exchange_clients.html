@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h2>Pick up a client</h2>
+
+    <!--Submit Form-->
+    <form action="{{ url_for('execute_exchange') }}" method=POST>
+        <dl>
+            <dt>Take Client
+            <dd><select name=client>
+                {% for client in clients%}
+                    <option value="{{ client }}">{{ client }}</option>
+                {% endfor %}
+            </select>
+            <dt>Give To
+            <dd><select name=giveTo>
+                {% for user in users %}
+                    <option value="{{ user }}">{{ user }}</option>
+                {% endfor %}
+            </select>
+            <br><br><dd><input class=btn type="submit" value=Submit>
+        </dl>
+    </form>
+{% endblock %}

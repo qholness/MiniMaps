@@ -1,55 +1,58 @@
 {% extends 'base.html' %}
 {% block content %}
-    <h2 id='status'>Client Status</h2>
-    <hr>
+    <h2><strong>Client Status</strong></h2>
+    <br>
 
     <!--Client table-->
-    <table id=MyClients>
-        <script>
+    <table id=MyClients class="stripe" width="100%" cellspacing="0">
+        <thead>
+            <th>Client</th>
+            <th>Status</th>
+            <th>Import URL</th>
+            <th>ETA</th>
+            <th>Notes</th>
+            <th>Created</th>
+            <th>Updated</th>
+        </thead>
+        <tbody>
+            {% for index, row in data.iterrows() %}
+                {% set name = row['name'] %}
+                {% set status = row['status'] %}
+                {% set instance_url = row['instance_url'] %}
+                {% set import_url = row['import_url'] %}
+                {% set eta = row['estimated_completion'] %}
+                {% set notes = row['import_notes'] %}
+                {% set created = row['created_timestamp'] %}
+                {% set updated = row['updated_timestamp'] %}
+
+                {% set backgroundColor = status_colors.get(status, 'white') %}
+                {% set textColor = text_colors[status] %}
+                <tr>
+                    <td><a href="{{ instance_url if instance_url else url_for('client_statuses') }}">
+                        {{ name }}
+                        </a>
+                    </td>
+                    <td style="background-color: {{ backgroundColor }};
+                        color: {{ textColor }};">
+                        {{ status if status else "" }}
+                    </td>
+                    <td><a href="{{ import_url if import_url else url_for('client_statuses') }}">
+                        {{ import_url[29:29 + 10] + "..." if import_url else "" }}</a>
+                    </td>
+                    <td>{{ eta if eta else "" }}</td>
+                    <td><a href="{{ url_for('full_note', note=notes) }}">{{ notes[:30] + "..." if notes else "" }}
+                        </a>
+                    </td>
+                    <td>{{ created if created else "" }}</td>
+                    <td>{{ updated if updated else "" }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <script>
             $(document).ready(function() {
                 $('#MyClients').DataTable();
             });
         </script>
-        <thead>
-            <td>Client</td>
-            <td>Status</td>
-            <td>Instance URL</td>
-            <td>Import URL</td>
-            <td>Estimated Time</td>
-            <td>Notes</td>
-            <td>Created</td>
-            <td>Updated</td>
-        </thead>
-        {% for index, row in data.iterrows() %}
-            {% set name = row['name'] %}
-            {% set status = row['status'] %}
-            {% set instance_url = row['instance_url'] %}
-            {% set import_url = row['import_url'] %}
-            {% set eta = row['estimated_completion'] %}
-            {% set notes = row['import_notes'] %}
-            {% set created = row['created_timestamp'] %}
-            {% set updated = row['updated_timestamp'] %}
-
-            {% set backgroundColor = status_colors.get(status, 'white') %}
-            {% set textColor = text_colors[status] %}
-            <tr>
-                <td>{{ name }}</td>
-                <td style="background-color: {{ backgroundColor }};
-                    color: {{ textColor }};">
-                    {{ status if status else "" }}
-                </td>
-                <td><a href="{{ instance_url if instance_url else url_for('client_statuses') }}">
-                    {{ instance_url if instance_url else "" }}</a>
-                </td>
-                <td><a href="{{ import_url if import_url else url_for('client_statuses') }}">
-                    {{ import_url if import_url else "" }}</a>
-                </td>
-                <td>{{ eta if eta else "" }}</td>
-                <td>{{ notes if notes else "" }}</td>
-                <td>{{ created if created else "" }}</td>
-                <td>{{ updated if updated else "" }}</td>
-            </tr>
-        {% endfor %}
-    </table>
-    <script src="/static/autoRefresh.js"></script>
+    <!--<script src="/static/autoRefresh.js"></script>-->
 {% endblock %}

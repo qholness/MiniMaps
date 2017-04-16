@@ -1,10 +1,17 @@
 
 <!DOCTYPE html>
 {% set user = session.get('user', None) %}
+{% set login_time = session.get('login_time', None) %}
 {% block head %}
     <title>Briostack Dashboard</title>
-    <!--Twitter Boostrap-->
-    <link rel=stylesheet type=text/css href="/static/bootstrap/css/bootstrap.min.css/">
+    
+    <!--Viewport adjustments for mobile friendliness-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!--Boostrap-->
+    <link rel=stylesheet type=text/css href="/static/bootstrap/css/bootstrap.min.css">
+    <link rel=stylesheet type=text/css href="/static/bootstrap/css/bootstrap-responsive.min.css">
+    <script type="text/javascript" src="/static/bootstrap/js/bootstrap.js"></script>
 
     <!--CreateJS-->
     <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
@@ -12,47 +19,67 @@
     <!--DataTablesJS-->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/jq-2.2.4/dt-1.10.13/datatables.min.css"/>
     <script type="text/javascript" src="https://cdn.datatables.net/v/dt/jq-2.2.4/dt-1.10.13/datatables.min.js"></script>
+    
+    <!--Navbar-->
+    <nav class="navbar navbar-default">
+        <ul class="nav navbar-nav">
+            <li id="{{ url_for('index') }}"><a class="navbar-brand" href="{{ url_for('index') }}" style="font-size: 16px; font-weight: bold;">Briostack</a></li>
+            <li id="{{ url_for('client_statuses')  }}"><a href="{{ url_for('client_statuses')  }}">Dashboard</a></li>
+            {% if not session.logged_in %}
+                <li id="{{ url_for('login') }}"><a href="{{ url_for('login') }}">Log in</a></li>
+            {% else %}
+                <li id="{{ url_for('my_clients') }}"><a href="{{ url_for('my_clients')  }}">My Clients</a></li>
+                <li id="{{ url_for('submit_client_form') }}"><a href="{{ url_for('submit_client_form') }}">New Client</a></li>
+                <li id="{{ url_for('update_client_form') }}"><a href="{{ url_for('update_client_form') }}">Update Client</a></li>
+                <li id="{{ url_for('exchange_clients') }}"><a href="{{ url_for('exchange_clients') }}">Client Exchange</a></li>
+                <li id="{{ url_for('submit_sql') }}"><a href="{{ url_for('submit_sql') }}">Execute SQL</a></li>
+                <!--<li id="{{ url_for('game') }}"><a href="{{ url_for('game') }}">Play a little game</a></li>-->
+                <li id="{{ url_for('logout') }}"><a href="{{ url_for('logout') }}">Log out</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+<!--Flashed Messages-->
+{% if get_flashed_messages() %}
+    <div class="container">
+    {% for message in get_flashed_messages() %}
+        <div class="alert 
+        {% if 'Success' in message %}    alert-success
+        {% elif 'Fail' in message %}    alert-danger
+        {% elif 'Info' in message %}    alert-info
+        {% elif 'Warning' in message %}    alert-warning
+        {% endif %}alert-dismissable" >
+            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+            {{ message }}
+        </div>
+    {% endfor %}
+    </div>
+{% endif %}
+
 {% endblock %}
 
 
 {% block body %}
-    <div class="container">
-        <!--Navbar-->
-        <nav class="navbar navbar-default">
-            <ul class="nav navbar-nav">
-                <li id="{{ url_for('index') }}"><a class="navbar-brand" href="{{ url_for('index') }}">Briostack {{ " - {}".format(user) if user else "" }}</a></li>
-                <li id="{{ url_for('client_statuses')  }}"><a href="{{ url_for('client_statuses')  }}">Clients</a></li>
-                {% if not session.logged_in %}
-                    <li id="{{ url_for('login') }}"><a href="{{ url_for('login') }}">Log in</a></li>
-                {% else %}
-                    <li id="{{ url_for('my_clients') }}"><a href="{{ url_for('my_clients')  }}">My Clients</a></li>
-                    <li id="{{ url_for('submit_client_form') }}"><a href="{{ url_for('submit_client_form') }}">Create New Client</a></li>
-                    <li id="{{ url_for('update_client_form') }}"><a href="{{ url_for('update_client_form') }}">Update Client</a></li>
-                    <li id="{{ url_for('submit_sql') }}"><a href="{{ url_for('submit_sql') }}">Submit SQL</a></li>
-                    <li id="{{ url_for('game') }}"><a href="{{ url_for('game') }}">Play a little game</a></li>
-                    <li id="{{ url_for('logout') }}"><a href="{{ url_for('logout') }}">Log out</a></li>
-                {% endif %}
-            </ul>
-        </nav>
-        <br>
+    <!--Content block-->
+    <div class="container-fluid">{% block content %}{% endblock %}</div>
 
-        <!--Flashed Messages-->
-        {% for message in get_flashed_messages() %}
-            <div class="alert alert-warning">{{ message }}</div>
-        {% endfor %}
+    <!--Bottom bar-->
+    {% if user %}
+        <div class=container style="left: 80%; bottom: 0px; position: fixed; height: 30px; width: 100%">
+             <span>Logged In as: {{ user }}. {{ login_time }}</span>
+        </div>
+    {% endif %}
 
-        <!--Content block-->
-        {% block content %}{% endblock %}
-    </div>
-    <hr>
+    <!--Extra CSS-->
     <style>
-        .link {
-            /*font-size: 16px;*/
-        }
-        #active {
+        .active {
             font-weight: bold;
         }
+        th {
+            font-size: 16px;
+        }
     </style>
+
+    <!--Extra scripting-->
     <script>
         var active = document.getElementById(window.location.pathname);
         active.className = active.className + " active";

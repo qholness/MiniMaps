@@ -1,23 +1,38 @@
 {% extends 'base.html' %}
+
+
 {% block content %}
-    <div>Live Count: <span style="color: green;">{{ live_count }}</span></div>
-    <hr>
     <!--Client table-->
-    <table id=BrioClientTable>
+    <h2><strong>{{ title }}</strong></h2>
+    <div class="container-fluid">
+        <div class="row">
+            {% for k, v in counts.items() %}
+                {% set backgroundColor = status_colors.get(k, 'white') %}
+                {% set textColor = text_colors[k] %}
+                <div class="col-sm-4" style="
+                        background-color: {{ backgroundColor }};
+                        color: {{ textColor }};">                    
+                    {{ k }}: {{ v }}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    <br>
+    <table id="BrioClientTable" class="stripe" width="100%" cellspacing="0">
         <thead>
-            <h3>Client Statuses</h3>
             <th>Client</th>
             <th>Status</th>
-            <th>Instance URL</th>
-            <th>Assigned To</th>
-            <th>Estimated Completion</th>
+            <!--<th>Instance URL</th>-->
+            <th>Assignee</th>
+            <th>ETA</th>
             <th>Notes</th>
             <th>Created</th>
-            <th>Updated</th>
+            <!--<th>Updated</th>-->
             <th>Queue Days</th>
-            <th>Update Days</th>
+            <!--<th>Update Days</th>-->
         </thead>
-        
+
+        <tbody>
         {% for index, row in data.iterrows() %}
             {% set name = row['name'] %}
             {% set status = row['status'] %}
@@ -33,38 +48,34 @@
             {% set backgroundColor = status_colors.get(status, 'white') %}
             {% set textColor = text_colors[status] %}
             <tr>
-                <td>{{ name }}</td>
-                <td style="background-color: {{ backgroundColor }};
-                    color: {{ textColor }};">
-                    {{ status if status else "" }}
+                <td><a href="{{ instance_url if instance_url else url_for('client_statuses') }}">
+                    {{ name }}
+                    </a>
                 </td>
-                <td>
-                    <a href="{{ instance_url if instance_url else url_for('client_statuses') }}">
-                    {{ instance_url if instance_url else "" }}</a>
+                <td style="
+                        background-color: {{ backgroundColor }};
+                        color: {{ textColor }};">
+                    {{ status if status else "" }}
                 </td>
                 <td>{{ assignee if assignee else "" }}</td>
                 <td>{{ eta if eta else "" }}</td>
-                <td>{{ notes if notes else ""}}</td>
+                <td><a href="{{ url_for('full_note', note=notes) }}">{{ notes[:18] + "..." if notes else ""}}</a></td>
                 <td>{{ created if created else "" }}</td>
-                <td>{{ updated if updated else "" }}</td>
+                <!--<td>{{ updated if updated else "" }}</td>-->
                 <td>{{ queue_days if queue_days else "" }}</td>
-                <td>{{ update_days if update_days else "" }}</td>
+                <!--<td>{{ update_days if update_days else "" }}</td>-->
             </tr>
         {% endfor %}
+        </tbody>
     </table>
-
-
-
     <!--Auto refresh page-->
     <script>
         $(document).ready(function() {
-            $('#BrioClientTable').DataTable();
+            $('#BrioClientTable').DataTable( {
+                "order" : [[5, "asc"]]
+            } );
+
         })
     </script>
     <script src="/static/autoRefresh.js"></script>
-    <style>
-        th {
-            font-size: 16px;
-        }
-    </style>
 {% endblock %}
