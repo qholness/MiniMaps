@@ -182,9 +182,9 @@ def submit_client():
             
             db.execute('''
             INSERT INTO clients 
-                ([name], [import_url], [instance_url], [created_timestamp], [updated_timestamp]) 
-            VALUES (?, ?, ?, ?, ?);''',
-                [client, instanceUrl, importUrl, timestamp, timestamp]
+                ([name], [import_url], [instance_url], [created_timestamp], [updated_timestamp], [assignee]) 
+            VALUES (?, ?, ?, ?, ?, ?);''',
+                [client, instanceUrl, importUrl, timestamp, timestamp, session['user']]
             )
 
         except:
