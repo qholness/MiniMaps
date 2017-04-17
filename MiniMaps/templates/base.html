@@ -1,33 +1,83 @@
 
 <!DOCTYPE html>
 {% block head %}
-    <title>Minimal Maps</title>
+    <title>Ranbats</title>
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+
+    <!-- Create.js -->
     <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+
+    <!-- Bootstrap -->
+    <!-- URL 
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    -->
+    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+
+    <!--Leaflet.js-->
+
+
+    <!--D3.js-->
+
 {% endblock %}
 
+{% block navbar %}
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#CollapseNav" aria-expanded="false">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="{{ url_for('index') }}">Ranbats.com</a>
+            </div>
+            <div class="collapse navbar-collapse" id="CollapseNav">
+                <ul class="nav navbar-nav">
+                    <li id="{{ url_for('index') }}"><a href="{{ url_for('index') }}">Home</a></li>
+                    {% if not session.logged_in %}
+                        <li id="{{ url_for('login') }}"><a href="{{ url_for('login') }}">Log in</a></li>
+                        <li id="{{ url_for('index') }}"><a href="/register">Register</a></li>
+                    {% else %}
+                        <li id="{{ url_for('showMe') }}"><a href="{{ url_for('showMe') }}"> {{ session.user }}</a></li>
+                        <li id="{{ url_for('game') }}"><a href="{{ url_for('game') }}">Play a little game</a></li>
+                        <li id="{{ url_for('logout') }}"><a href="{{ url_for('logout') }}">Log out</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+{% endblock %}
 
-
-
-<div>
-    <h1>Minimal Maps</h1>
-    {% block navbar %}
-        <div class="navbar navbar-fixed-top">
-            <a href="{{ url_for('index') }}">Home</a>
-            {% if not session.logged_in %}
-                <a href="{{ url_for('login') }}">Log in</a>
-                <a href="/register">Register</a>
-            {% else %}
-                <a href="{{ url_for('test') }}">Play a little game</a>
-                <a href="{{ url_for('logout') }}">Log out</a>
-            {% endif %}
-        {% for message in get_flashed_messages() %}
-            <div class=flash>{{ message }}</div>
-        {% endfor %}
-    {% endblock %}
-        {% block body %}
-            {% block content %}
-            {% endblock %}
+{% block body %}
+    <div class="container-fluid">
+        {% if get_flashed_messages() %}
+            {% for message in get_flashed_messages() %}
+                <div class="alert">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    
+    <!-- Content -->
+        {% block content %}
         {% endblock %}
     </div>
-</div>
+    {% if session.logged_in %}
+        <div id=BottomBar>
+            Logged in as <strong>{{ session.user }}</strong> : Since {{ session.login_time }}
+        </div>
+    {% endif %}
+
+    <style>
+        #BottomBar {
+            bottom: 0px;
+            left: 0px;
+            position: fixed;
+        }
+    </style>
+
+    <script>
+        // Update active in navbar
+        var active = document.getElementById(window.location.pathname);
+        active.className = active.className + " active";
+    </script>
+{% endblock %}
