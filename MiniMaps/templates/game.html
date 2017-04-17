@@ -6,6 +6,47 @@
 {% block content %}
 
 <div>
+    <div id=testMe></div>
+    <script type=text/jsx>
+        var Input = React.createClass({
+            // Update the label
+            updateLabel: function(event){
+                this.setState({value: event.target.value});
+            },
+            // Initial state of React
+            getInitialState: function(){
+                return {
+                    value: 'React.js is kind of cool.'
+                }
+            },
+            // ?
+            componentWillMount: function(){
+                this.setState({value: this.state.value})
+            },
+            // Render function
+            render: function(){
+                return (
+                    <div className="update-label">
+                        <input type="text" placeholder="Enter text" onChange={this.updateLabel}/>
+                        <Label value={this.state.value}/>
+                    </div>
+                )
+            }
+        });
+
+        var Label = React.createClass({
+            render: function(){
+                return (
+                <div>
+                    <h2>{this.props.value}</h2>
+                </div>
+                )
+            }
+        });
+
+        React.render(<Input/>, document.getElementById('testMe'));
+
+    </script>
     <form>
         Network Capacity: <input type="text" id="capacity" value=25>
         Input Speed: <input type="text" id="speed" value=15>
