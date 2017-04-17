@@ -79,16 +79,14 @@ def execute_change_password():
     if new_password != conf_password:
         flash("Warning: Passwords don't match")
         return redirect(url_for('change_password'))
-
-    SQL = '''
-        UPDATE users
-        SET [password] = '{}'
-        WHERE [username] = '{}'
-        '''.format(new_password, session['user'])
     
     try:
     
-        db.execute(SQL)
+        db.execute('''UPDATE users
+            SET [password] = ?
+            WHERE [username] = ?
+            ''', (new_password, session['user'])
+        )
         flash("Success: Password change was successful")
         db.close()
         return redirect(url_for('my_clients'))
@@ -353,21 +351,31 @@ def update_client():
 
     if check_login_status(): # Connect to database:
         return redirect('login')
+    
+    
     db = get_db()
 
         
     if client:
-        update_status = '''UPDATE clients SET 
-            [status] = '{}', [updated_timestamp] = '{}' WHERE [name] = '{}';'''.format(status, timestamp, client)
-        execute_updates(db, update_status)
+        # Update client
+        db.execute('''UPDATE clients 
+            SET [status] = ?, [updated_timestamp] = ?
+            WHERE [name] = ?;''', (status, timestamp, client)
+        )
     
         if est_completion:
-            update_est_completion = '''UPDATE clients SET [est_completion] = '{}' WHERE [name] = '{}';'''.format(est_completion, client)
-            execute_updates(db, update_est_completion)
+            # Update est_completion if requested
+            db.execute('''UPDATE clients 
+                SET [est_completion] = ? 
+                WHERE [name] = ?;''', (est_completion, client)
+            )
         
         if import_notes:
-            update_import_notes = '''UPDATE clients SET [import_notes] = '{}' WHERE [name] = '{}';'''.format(import_notes, client)
-            execute_updates(db, update_import_notes)
+            # Only update notes if passed
+            db.execute('''UPDATE clients 
+                SET [import_notes] = ? 
+                WHERE [name] = ?;''', (import_notes, client)
+            )
 
     db.close()
 
@@ -407,24 +415,22 @@ def exchange_clients():
 @MinimalMaps.route('/execute-client-exchange', methods=['POST'])
 def execute_exchange():
     '''Execute client exchange'''
-    giveTo = request.form['giveTo']
-    client = request.form['client']
-    SQL = '''
-        UPDATE clients
-        SET [assignee] = '{}'
-        WHERE
-            [name] = '{}'
-        '''.format(giveTo, client) 
     if check_login_status():
         return redirect('login')
+    
     db = get_db()
 
     try:
-        db.execute(SQL)
+        giveTo = request.form['giveTo']
+        client = request.form['client']
+        db.execute('''UPDATE clients
+        SET [assignee] = ?
+        WHERE [name] = ?
+        ''', (giveTo, client)
+        )
         flash("Success: Updated assignee of \"{}\" to {}".format(client, giveTo))
         flash("Success: {}".format(SQL))
     except:
-        flash("Fail: {}".format(SQL))
         flash("Fail: {}".format(sys.exc_info()))
     db.close()
     return redirect(url_for('client_statuses'))

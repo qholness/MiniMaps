@@ -1,7 +1,9 @@
 MinimalMaps is a simple website that visualizes transit systems and their daily usage.
 
 Objective
---- Create a dashboard for data migration team
---- Simplify notification process from migration to CS by:
-        Minimizing the number of steps necessary to update job statuses
-        Centralize our segment of reporting and making navigation much easier.
+--- Create a easy-to-update dashboard for the data migration team
+
+Features
+--- Enable open perspective into what is going on where and with whom so that team members are aware of areas where they can assist.
+--- Automatic update of a main dashboard that tracks client onboarding status
+--- Allow quick exchange of clients between team members
