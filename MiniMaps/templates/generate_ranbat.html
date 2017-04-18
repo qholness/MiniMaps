@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h2>
+        <span>{{ league }}</span>
+        <span>{{ game }}</span>
+    </h2>
+    {% set submit = "/submitMatch/" + game + '/' + league %}
+
+    <form action="{{ url_for('submitMatch') }}" method=POST>
+        
+        <span name="{{league}}">{{ league }}</span>
+        <span name="{{game}}">{{ game }}</span>
+
+        <select name=p1>
+            <option value="">Select Player 1</option>
+            {% for gamer in players %}
+                <option value="{{ gamer }}">{{ gamer }}</option>
+            {% endfor %}
+        </select>
+
+        <select name=p2>
+            <option value="">Select Player 2</option>
+            {% for gamer in players %}
+                <option value="{{ gamer }}">{{ gamer }}</option>
+            {% endfor %}
+        </select>
+        
+        <select name=char1>
+            <option value="">Select Player 1's character</option>
+            {% for char in characters %}
+                <option value="{{ char }}">{{ char }}</option>
+            {% endfor %}
+        </select>
+
+        <select name=char2>
+            <option value="">Select Player 2's character</option>
+            {% for char in characters %}
+                <option value="{{ char }}">{{ char }}</option>
+            {% endfor %}
+        </select>
+
+        <input type=text class=btn name=league>{{ league }}</input>
+        <input type=text class=btn name=game>{{ game }}</input>
+        
+        <input type="submit" name=Submit value=Submit>
+        
+        <script>
+            var check_match = function() {
+                var p1, p2;
+                p1 = document.getElementById('p1').nodeValue;
+                p2 = document.getElementById('p2').nodeValue;
+            }
+        </script>
+    </form>
+{% endblock %}

@@ -39,7 +39,8 @@
                         <li id="{{ url_for('login') }}"><a href="{{ url_for('login') }}">Log in</a></li>
                         <li id="{{ url_for('index') }}"><a href="/register">Register</a></li>
                     {% else %}
-                        <li id="{{ url_for('showMe') }}"><a href="{{ url_for('showMe') }}"> {{ session.user }}</a></li>
+                        <li id="{{ url_for('showMe') }}"><a href="{{ url_for('showMe') }}">{{ session.user }}</a></li>
+                        <li id="{{ url_for('event') }}"><a href="{{ url_for('event') }}">Create Ranbat</a></li>
                         <li id="{{ url_for('game') }}"><a href="{{ url_for('game') }}">Play a little game</a></li>
                         <li id="{{ url_for('logout') }}"><a href="{{ url_for('logout') }}">Log out</a></li>
                     {% endif %}

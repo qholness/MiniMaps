@@ -7,10 +7,14 @@ import datetime
 import hashlib
 import base64
 import uuid
+import sys
 global today
 today = lambda : datetime.datetime.strftime(datetime.datetime.now(), "%D %T")
 
 
+
+################ utils ####################
+row_zero = lambda data: {k : v[0] for k, v in data.items()}
 
 
 
@@ -54,10 +58,8 @@ def register():
     if not session.get('logged_in'):
         flash("Enter your credentials to crete an account")
         return render_template('register.html')
-    
-    else:
-        
-        return redirect(url_for('index'))
+    flash('You are already logged in')
+    return redirect(url_for('index'))
 
 
 @MinimalMaps.route('/submit_reg', methods=['POST'])
@@ -133,7 +135,6 @@ def showMe():
         return redirect(url_for('login'))
     
     db = get_db()
-    row_zero = lambda data: {k : v[0] for k, v in data.items()}
 
     user_data = row_zero(
         pd.read_sql('''
@@ -164,4 +165,124 @@ def game():
     return render_template('game.html')
 
 
+@MinimalMaps.route('/ranbat')
+def event():
+    if not session.get('user'):
+        flash('You must be logged in to view this page')
+        return redirect(url_for('index'))
+    db = get_db()
+    
+    leagues = pd.read_sql('''
+        SELECT DISTINCT [name] 
+        FROM leagues 
+        ;''', db).to_dict('list')['name']
+    
+    games = pd.read_sql('''
+        SELECT DISTINCT [name]
+        FROM game
+        ;''', db).to_dict('list')['name']
+    
+    db.close()
+   
+    return render_template('ranbat.html', leagues=leagues, games=games)
 
+def get_players(db, league):
+    '''Get league players query'''
+    players = pd.read_sql('''
+        SELECT [username]
+        FROM users
+        WHERE [league]='{}'
+        ;'''.format(league), db).to_dict('list')['username']
+
+    return players
+    
+def get_characters(db, game):
+    '''Get game characters query'''
+    characters = pd.read_sql('''
+        SELECT [character]
+        FROM characters
+        WHERE game='{}'
+        ;'''.format(game), db).to_dict('list')['character']
+    
+    return characters
+
+
+@MinimalMaps.route('/ranbat-create-league', methods=['POST', 'GET'])
+def get_league_data():
+    league = request.form.get('league', None)
+    game = request.form.get('game', None)
+    
+    if not league:
+        flash("No league selected")
+        return redirect(url_for('event'))
+    
+    if not game:
+        flash('No game selected')
+        return redirect(url_for('event'))
+
+    db = get_db()
+
+    characters = get_characters(db, game)
+    players = get_players(db, league)
+    
+    db.close()
+
+    return render_template('generate_ranbat.html', players=players, characters=characters, 
+    league=league, game=game)
+
+
+@MinimalMaps.route('/submit-match', methods=['POST'])
+def submitMatch():
+    
+    p1 = request.form.get('p1')
+    p2 = request.form.get('p2')
+    char1 = request.form.get('char1')
+    char2 = request.form.get('char2')
+    request.span.get('game')
+    characters = get_characters(db, request.form.get('game'))
+    players = get_players(db, request.form.get('league'))
+
+    if p1 == p2:
+        flash("Same player selected. Please try again")
+        return render_template('generate_ranbat.html', players=players, characters=Characters, league=league, game=game)
+
+    if not p1:
+        flash("Player 1 was not selected")
+        return render_template('generate_ranbat.html', players=players, characters=Characters, league=league, game=game)
+    
+    if not p2:
+        flash("Player 1 was not selected")
+        return render_template('generate_ranbat.html', players=players, characters=Characters, league=league, game=game)
+
+    if not char1:
+        flash("Player 1 was not selected")
+        return render_template('generate_ranbat.html', players=players, characters=Characters, league=league, game=game)
+    
+    if not char2:
+        flash("Player 1 was not selected")
+        return render_template('generate_ranbat.html', players=players, characters=Characters, league=league, game=game)
+
+    db = get_db()
+
+    try:
+        
+        db.execute('''
+            INSERT INTO matchLog ([p1], [p2],[char1],[char2])
+            VALUES (?,?,?,?)''', [p1, p2, char1, char2]
+        )
+        
+        flash("Submitted match. Create another of end ranbat")
+        
+        db.close()
+
+        return render_template('generate_ranbat.html', players=players, characters=Characters, league=league, game=game)
+    
+    except:
+        
+        flash('Failed to submit match')
+
+        db.close()
+
+        print("{}".format(sys.exc_info()))
+
+        return render_template('generate_ranbat.html', players=players, characters=Characters, league=league, game=game)
