@@ -514,7 +514,7 @@ def login_user():
                 # Login successful
                 session['logged_in'] = True
                 session['user'] = checkname
-                session['login_time'] = today
+                session['login_time'] = today()
                 flash('Success: Welcome {}'.format(checkname))
                 db.close() # Close db connection
                 return redirect(url_for('my_clients')) # Redirect to my clients
