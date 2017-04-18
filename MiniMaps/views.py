@@ -457,7 +457,7 @@ def submitRegistration():
 @MinimalMaps.route('/login')
 def login():
     '''User login page'''
-    return render_template('login.html')
+    return render_template('login.html', _scheme="https")
 
 
 @MinimalMaps.route('/login_user', methods=['POST'])

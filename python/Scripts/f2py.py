@@ -1,4 +1,4 @@
-#!c:\users\qholn\desktop\briostack\python\scripts\python.exe
+#!c:\users\quent\desktop\minimalmaps\python\scripts\python.exe
 # See http://cens.ioc.ee/projects/f2py2e/
 from __future__ import division, print_function
 

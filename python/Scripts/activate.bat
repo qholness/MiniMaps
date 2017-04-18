@@ -1,5 +1,5 @@
 @echo off
-set "VIRTUAL_ENV=C:\Users\qholn\Desktop\Briostack\python"
+set "VIRTUAL_ENV=C:\Users\quent\Desktop\MinimalMaps\python"
 
 if defined _OLD_VIRTUAL_PROMPT (
     set "PROMPT=%_OLD_VIRTUAL_PROMPT%"
