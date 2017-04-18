@@ -429,7 +429,6 @@ def execute_exchange():
         ''', (giveTo, client)
         )
         flash("Success: Updated assignee of \"{}\" to {}".format(client, giveTo))
-        flash("Success: {}".format(SQL))
     except:
         flash("Fail: {}".format(sys.exc_info()))
     db.close()
