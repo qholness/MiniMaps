@@ -10,7 +10,7 @@ import uuid
 import sys
 import random
 global today
-today = datetime.datetime.now()
+today = lambda: datetime.datetime.now()
 
 
 ################ Utils ################
@@ -130,30 +130,45 @@ def index():
 
 
 ################ SQL Manipulation ################
-@MinimalMaps.route('/submit_sql')
+@MinimalMaps.route('/sql_out')
 def submit_sql():
     '''Submit SQL for execution on the database'''
     check_login_status()
-    return render_template('submit_sql.html')
+    data = None
+    if session.get('data'):
+        data = {key : pd.read_json(value) for key, value in session['data'].items()}
+        session.pop('data')
+    else:
+        return redirect(url_for(my_clients))
+    return render_template('submit_sql.html', data=data)
 
 
 @MinimalMaps.route('/execute', methods=['POST'])
 def execute_sql():
     '''Execute the SQL statements'''
+    # Check if user is logged-in
     if check_login_status():
         return redirect('login')
-    db = get_db()
+    
+    db = get_db() # Get db connection
 
-    statements = request.form['sql'].split(';') # List of statements to execute
-
+    statements = request.form['sql'].split(';') # List of statements to execute (splitting on ";")
+    
+    session['data'] = {} # Init session data hash
+    
     for s in statements:
         s += ";" # Add an extra semicolon just in case...
         try:
-            db.execute(s)
-            flash("Success: {}".format(s))
+            if "select" in s.lower(): # If a select statement, push select output to session['data']
+                session['data'][s] = pd.read_sql(s, db).to_json() # Hash results to select statement
+            else:
+                db.execute(s)
+                flash("Success".format(s))
         except:
             flash("Fail: {}".format(sys.exc_info()))
+    
     db.close()
+    
     return redirect(url_for('submit_sql'))
 
 
@@ -162,8 +177,8 @@ def execute_sql():
 ################ User Views ################
 def get_colors(db):
     '''Get colors for data tables'''
-    status_colors = pd.read_sql("SELECT [status], [color] FROM client_status", db).set_index('status').to_dict()['color']
-    text_colors = pd.read_sql("SELECT [status], [text_color] FROM client_status", db).set_index('status').to_dict()['text_color']
+    status_colors = pd.read_sql("SELECT [status], [color] FROM client_status", db).set_index('status').to_dict()
+    text_colors = pd.read_sql("SELECT [status], [text_color] FROM client_status", db).set_index('status').to_dict()
     return status_colors, text_colors
 
 
@@ -172,10 +187,15 @@ def my_clients():
     '''View users clients. Only available to logged-in users'''
     if check_login_status():
         return redirect('login')
+        
     db = get_db()
 
     status_colors, text_colors = get_colors(db)
-    
+    text_colors = text_colors['text_color']
+    status_colors = status_colors['color']
+    statii = list(status_colors.keys())
+    clients = list(pd.read_sql('''SELECT DISTINCT [name] FROM clients;''', db)['name'])
+    users = list(pd.read_sql('''SELECT DISTINCT [username] FROM users;''', db)['username'])
     client_data = pd.read_sql('''
     SELECT 
         [name], [status], [instance_url], [import_url], [estimated_completion], [import_notes], 
@@ -185,17 +205,21 @@ def my_clients():
     WHERE 
         [assignee]='{}' '''.format(session['user']), db
     )
+    
+    myClients = list(client_data['name'])
 
     db.close()
     return render_template('my_clients.html', data=client_data, 
-    status_colors=status_colors, text_colors=text_colors)
+    status_colors=status_colors, text_colors=text_colors, statii=statii, clients=clients, users=users, myClients=myClients)
 
 
 @MinimalMaps.route('/client_statuses')
 def client_statuses():
     '''Dashboard for viewing the status of all clients'''
-    db = get_db()
+    db = get_db() # Connect to database
     status_colors, text_colors = get_colors(db)
+    status_colors = status_colors['color']
+    text_colors = text_colors['text_color']
     client_data = pd.read_sql('''
         SELECT 
             [name], [status], [instance_url], [import_url], [assignee], 
@@ -209,13 +233,14 @@ def client_statuses():
     client_data['updated_timestamp'] = pd.to_datetime(client_data['updated_timestamp'])
 
     # Days in queue and days since last update
-    client_data['queue_days'] = [(today - _).days if not pd.isnull(today - _) else "" 
-        for _ in client_data['created_timestamp']]
+    day_dif = lambda x: today() - x
+    client_data['queue_days'] = [day_dif(_).days if not pd.isnull(day_dif(_)) else "" 
+        for _ in client_data['created_timestamp']] # Days since created
     
-    client_data['update_days'] = [(today - _).days if not pd.isnull(today - _) else "" 
-        for _ in client_data['updated_timestamp']]
+    client_data['update_days'] = [day_dif(_).days if not pd.isnull(day_dif(_)) else "" 
+        for _ in client_data['updated_timestamp']] # Days since last updated
     
-    counts = client_data.status.value_counts() # Counts of status types
+    counts = client_data.status.value_counts() # Counts of status types {type : count}
     
     db.close()
 
@@ -230,11 +255,13 @@ def client_statuses():
 
 
 ################ Submit clients ################
-@MinimalMaps.route('/new_client_form', methods=['GET'])
-def submit_client_form():
-    '''Form for submitting a new client'''
-    check_login_status()
-    return render_template('submit_new_client.html')
+
+## Considering depricating
+# @MinimalMaps.route('/new_client_form', methods=['GET'])
+# def submit_client_form():
+#     '''Form for submitting a new client'''
+#     check_login_status()
+#     return render_template('submit_new_client.html')
 
 
 def clean_client_name(string):
@@ -292,29 +319,31 @@ def submit_client():
 
 
 ################ Update client database ################
-@MinimalMaps.route('/update_client_form')
-def update_client_form():
-    '''Form for submitting a new client'''
-    if check_login_status():
-        return redirect('login')
-    db = get_db()
+
+## Considering depricating
+# @MinimalMaps.route('/update_client_form')
+# def update_client_form():
+#     '''Form for submitting a new client'''
+#     if check_login_status():
+#         return redirect('login')
+#     db = get_db()
 
     
-    statii = pd.read_sql('''
-    SELECT S.[id], S.[status] 
-    FROM client_status AS S;''', db).sort_values('id', ascending=True)
+#     statii = pd.read_sql('''
+#     SELECT S.[id], S.[status] 
+#     FROM client_status AS S;''', db).sort_values('id', ascending=True)
 
-    clients = pd.read_sql('''
-        SELECT C.[name] 
-        FROM clients AS C
-        WHERE C.assignee='{}';'''.format(session['user']), db).sort_values('name', ascending=True)
+#     clients = pd.read_sql('''
+#         SELECT C.[name] 
+#         FROM clients AS C
+#         WHERE C.assignee='{}';'''.format(session['user']), db).sort_values('name', ascending=True)
     
-    clients = list(clients.name) # List of clients associated with user
-    statii = list(statii.status) # List of statuses to updates to
+#     clients = list(clients.name) # List of clients associated with user
+#     statii = list(statii.status) # List of statuses to updates to
     
-    db.close()
+#     db.close()
 
-    return render_template('update_client_form.html', clients=clients, statii=statii)
+#     return render_template('update_client_form.html', clients=clients, statii=statii)
 
 def execute_updates(db, execution_string):
     try:
@@ -340,8 +369,6 @@ def fix_input_string(string):
 @MinimalMaps.route('/update_client', methods=['POST'])
 def update_client():
     '''Update an existing client'''
-
-    
     # Form extraction
     client = request.form['client']
     status = request.form['status']
@@ -358,11 +385,12 @@ def update_client():
         
     if client:
         # Update client
-        db.execute('''UPDATE clients 
-            SET [status] = ?, [updated_timestamp] = ?
-            WHERE [name] = ?;''', (status, timestamp, client)
-        )
-    
+        if status:
+            db.execute('''UPDATE clients 
+                SET [status] = ?, [updated_timestamp] = ?
+                WHERE [name] = ?;''', (status, timestamp, client)
+            )
+        
         if est_completion:
             # Update est_completion if requested
             db.execute('''UPDATE clients 
@@ -376,7 +404,10 @@ def update_client():
                 SET [import_notes] = ? 
                 WHERE [name] = ?;''', (import_notes, client)
             )
-
+    else:
+    
+        flash("No client selected")
+    
     db.close()
 
     return redirect(url_for('my_clients'))

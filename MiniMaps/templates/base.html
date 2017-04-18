@@ -39,10 +39,6 @@
                 <li id="{{ url_for('login') }}"><a href="{{ url_for('login') }}">Log in</a></li>
             {% else %}
                 <li id="{{ url_for('my_clients') }}"><a href="{{ url_for('my_clients')  }}">My Clients</a></li>
-                <li id="{{ url_for('submit_client_form') }}"><a href="{{ url_for('submit_client_form') }}">New Client</a></li>
-                <li id="{{ url_for('update_client_form') }}"><a href="{{ url_for('update_client_form') }}">Update Client</a></li>
-                <li id="{{ url_for('exchange_clients') }}"><a href="{{ url_for('exchange_clients') }}">Client Exchange</a></li>
-                <li id="{{ url_for('submit_sql') }}"><a href="{{ url_for('submit_sql') }}">Execute SQL</a></li>
                 <!--<li id="{{ url_for('game') }}"><a href="{{ url_for('game') }}">Play a little game</a></li>-->
                 <li id="{{ url_for('logout') }}"><a href="{{ url_for('logout') }}">Log out</a></li>
             {% endif %}
@@ -70,7 +66,18 @@
 
 {% block body %}
     <!--Content block-->
-    <div class="container-fluid">{% block content %}{% endblock %}</div>
+    <div class="container-fluid">
+        
+        <!--Content block-->
+        {% block content %}
+        {% endblock %}
+
+        <!--Table/Data section-->
+        <div class="tableDiv">
+        {% block table %}
+        {% endblock %}
+        </div>
+    </div>
 
     <!--Bottom bar-->
     {% if user %}
@@ -86,6 +93,10 @@
         }
         th {
             font-size: 16px;
+        }
+        .tableDiv {
+            width: 100%;
+            overflow-x: auto;
         }
     </style>
 

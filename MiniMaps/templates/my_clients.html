@@ -1,9 +1,113 @@
 {% extends 'base.html' %}
+{% set n_cols = 12//4 %} <!--Number of columns for user-->
 {% block content %}
-    <h2><strong>Client Status</strong></h2>
-    <br>
+    <h1><strong>My Clients</strong></h1>
+    <hr>
+    <script>
+        var showHide = function(id) {
+            var div = document.getElementById(id);
+            if (div.style.display == 'none') {
+                div.style.display = 'block';
+            }
+            else {
+                div.style.display = 'none';
+            }
+        };
+    </script>
+    <div class="row">
 
+        <!--New Client Form-->
+        <div class="col-sm-{{ n_cols }}">
+            <h2><button class="btn btn-info btn-block" onclick="showHide('newClientForm');">New Client</button></h2>
+            <form id=newClientForm action="{{ url_for('submit_client') }}" method=post style="display: none;">
+                <dl>
+                    <dt>Client Name
+                    <dd><input type="text" name=client_name>
+                    <dt>Instance URL
+                    <dd><input type="text" name=client_url>
+                    <dt>Import URL
+                    <dd><input id=noteInput onclick="ExpandField('noteInput');" type="text" name=client_import_url>
+                    <br><br>
+                    <dd><input class="btn btn-primary" type="submit" value=Submit>
+                </dl>
+            </form>
+        </div>
+    
+        <!--Update client form-->
+        <div class="col-sm-{{ n_cols }}">
+            <h2><button class="btn btn-info btn-block" onclick="showHide('updateClientForm');">Update Client</button></h2>
+            <form id=updateClientForm action="{{ url_for('update_client') }}" method=POST style="display: none;">
+                <dl>
+                    <dt>Client Name <!-- Drop box... Here-->
+                    <dd><select name=client>
+                            <option value="">Select Client</option>
+                        {% for _ in myClients %}
+                            <option value="{{ _ }}">{{ _ }}</option>
+                        {% endfor %}
+                    </select>
+                    <dt>Status
+                    <dd><select name=status>
+                            <option value="">Select Status</option>
+                            {% for _ in statii %}
+                                <option value="{{ _ }}">{{ _ }}</option>
+                            {% endfor %}
+                        </select>
+                    <dt>Estimated Completion
+                    <dd><input type=text name="estimated_completion">
+                    <dt>Notes
+                    <dd><textarea id="updateField" onclick="ExpandField('updateField');" onblur="ShrinkField('updateField');"
+                        type=text name="import_notes" value=""></textarea>
+                    <br><br>
+                    <dd><input class="btn btn-primary" type="submit" value=Submit>
+                </dl>
+            </form>
+        </div>
+        
+        <!--Client Exchange-->
+        <div class="col-sm-{{ n_cols }}">
+            <h2><button class="btn btn-info btn-block" onclick="showHide('exchangeClientForm');">Client Exchange</button></h2>
+            <form id=exchangeClientForm action="{{ url_for('execute_exchange') }}" method=POST style="display: none;">
+                <dl>
+                    <dt>Take Client
+                    <dd><select name=client>
+                        <option value="">Select a client to take</option>
+                        {% for client in clients%}
+                            <option value="{{ client }}">{{ client }}</option>
+                        {% endfor %}
+                    </select>
+                    <dt>Give To
+                    <dd><select name=giveTo>
+                        <option value="">Give client to...</option>
+                        {% for user in users %}
+                            <option value="{{ user }}">{{ user }}</option>
+                        {% endfor %}
+                    </select>
+                    <br><br>
+                    <dd><input class="btn btn-primary" type="submit" value=Submit>
+                </dl>
+            </form>
+        </div>
+
+        <!--SQL Entry Form-->
+        <div class="col-sm-{{ n_cols }}">
+            <h2><button class="btn btn-info btn-block" onclick="showHide('SQLForm');">Execute SQL</button></h2>
+            <form id=SQLForm action="{{ url_for('execute_sql') }}" method=post style="display: none;">
+                <dl>
+                    <dt>SQL
+                    <dd><textarea id="sqlArea" type="text" onclick="ExpandField('sqlArea');" onblur="ShrinkField('sqlArea');" name=sql></textarea>
+                    <br><br>
+                    <dd><input class="btn btn-primary" type="submit" value=Submit>
+                </dl>
+            </form>
+        </div>
+    </div>
+
+    <!--<script src="/static/autoRefresh.js"></script>-->
+{% endblock %}
+
+{% block table %}
     <!--Client table-->
+    <hr>
     <table id=MyClients class="stripe" width="100%" cellspacing="0">
         <thead>
             <th>Client</th>
@@ -49,10 +153,24 @@
             {% endfor %}
         </tbody>
     </table>
+    <!--Init datatable-->
     <script>
-            $(document).ready(function() {
-                $('#MyClients').DataTable();
-            });
-        </script>
-    <!--<script src="/static/autoRefresh.js"></script>-->
+        $(document).ready(function() {
+            $('#MyClients').DataTable();
+        });
+    </script>
+
+    <!--Expand and shrink fields-->
+    <script>
+        var ExpandField = function(id) {
+            var field = document.getElementById(id);
+            field.style.width = '200%';
+            field.style.height = '200%';
+        };
+        var ShrinkField = function(id) {
+            var field = document.getElementById(id);
+            field.style.width = '100%';
+            field.style.height = '100%';
+        }
+    </script>
 {% endblock %}

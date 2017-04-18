@@ -1,13 +1,39 @@
 {% extends 'base.html' %}
 {% block content %}
-    <h2>Execute SQL</h2>
-    
-    <!--SQL Entry Form-->
-    <form action="{{ url_for('execute_sql') }}" method=post>
-        <dl>
-            <dt>SQL:
-            <dd><input type="text" name=sql>
-            <br><dd><input class=btn type="submit" value=Submit>
-        </dl>
-    </form>
+    {% if data %}
+    <div class="tableDiv">
+        {% for key, dataframe in data.items() %}
+            {% set tname = "table{}".format(loop.index) %}
+            {% set columns = dataframe.columns %}
+            <table id="{{ tname }}" class="table stripe" width=100%>
+                <h2>{{ key }}</h2>
+                <thead>
+                    {% for col in columns %}
+                        <th>{{ col }}</th>
+                    {% endfor %}
+                </thead>
+                <tbody>
+                    {% for index, row in dataframe.iterrows() %}
+                        <tr>
+                            {% for col in columns %}
+                                {% if row[col] %}
+                                    {% if 'url' in col.lower() %}
+                                        <td><a href="{{ row[col] }}">{{ row[col] }}</a></td>
+                                    {% else %}
+                                        <td>{{ row[col] }}</td> 
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <script>
+                $(document).ready(function() {
+                    $('#{{ tname }}').DataTable();
+                });
+            </script>
+        {% endfor %}
+    </div>
+    {% endif %}
 {% endblock %}

@@ -1,24 +1,44 @@
 {% extends 'base.html' %}
 
-
 {% block content %}
     <!--Client table-->
     <h2><strong>{{ title }}</strong></h2>
+    <hr>
+    <!--Status count container-->
     <div class="container-fluid">
         <div class="row">
             {% for k, v in counts.items() %}
                 {% set backgroundColor = status_colors.get(k, 'white') %}
-                {% set textColor = text_colors[k] %}
+                {% set textColor = text_colors.get(k, 'black') %}
                 <div class="col-sm-4" style="
                         background-color: {{ backgroundColor }};
-                        color: {{ textColor }};">                    
-                    {{ k }}: {{ v }}
+                        color: {{ textColor }};">    
+                    <strong>{{ k }}</strong>: {{ v }}
                 </div>
             {% endfor %}
         </div>
     </div>
     <br>
-    <table id="BrioClientTable" class="stripe" width="100%" cellspacing="0">
+
+    <!--Auto refresh page script-->
+    <script src="/static/autoRefresh.js"></script>
+{% endblock %}
+
+<!--Set background and text color based on days late-->
+{% macro percent(n) %}
+    {{ "{}%".format(n) }}
+{% endmacro %}
+{% macro style_color(days, late_days=2) %}
+    {% if days %}
+        {% set red = ((days|int * 1.5)/255 * 100)|int %}
+        {% set green = 50 - red %}
+        style="background-color: RGB({{ percent(red) }}, {{ percent(green) }}, 0%); color: white;"
+    {% endif %}
+{% endmacro %}
+
+<!--Table content-->
+{% block table %}
+    <table id="BrioClientTable" class="display" width="100%" cellspacing="0">
         <thead>
             <th>Client</th>
             <th>Status</th>
@@ -29,7 +49,7 @@
             <th>Created</th>
             <!--<th>Updated</th>-->
             <th>Queue Days</th>
-            <!--<th>Update Days</th>-->
+            <th>Days Since Last Update</th>
         </thead>
 
         <tbody>
@@ -62,20 +82,24 @@
                 <td><a href="{{ url_for('full_note', note=notes) }}">{{ notes[:18] + "..." if notes else ""}}</a></td>
                 <td>{{ created if created else "" }}</td>
                 <!--<td>{{ updated if updated else "" }}</td>-->
-                <td>{{ queue_days if queue_days else "" }}</td>
-                <!--<td>{{ update_days if update_days else "" }}</td>-->
+                <td {{ style_color(queue_days) }}>
+                    {{ queue_days if queue_days else "" }}
+                </td>
+                <td {{ style_color(update_days) }}>
+                    {{ update_days if update_days else "" }}
+                </td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
-    <!--Auto refresh page-->
-    <script>
+
+     <script>
         $(document).ready(function() {
             $('#BrioClientTable').DataTable( {
-                "order" : [[5, "asc"]]
+                "order" : [[5, "asc"],
+                            [7, "desc"]]
             } );
-
         })
     </script>
-    <script src="/static/autoRefresh.js"></script>
+
 {% endblock %}
