@@ -165,6 +165,7 @@ def execute_sql():
                 db.execute(s)
                 flash("Success: {}".format(s))
         except:
+
             flash("Fail: {}".format(sys.exc_info()))
     
     db.close()
@@ -261,15 +262,6 @@ def client_statuses():
 
 
 ################ Submit clients ################
-
-## Considering depricating
-# @MinimalMaps.route('/new_client_form', methods=['GET'])
-# def submit_client_form():
-#     '''Form for submitting a new client'''
-#     check_login_status()
-#     return render_template('submit_new_client.html')
-
-
 def clean_client_name(string):
     '''Clean up the client name'''
     new_string = ""
@@ -311,7 +303,8 @@ def submit_client():
             flash("Failed: {}".format(sys.exc_info()))
             
             db.close()
-            return redirect(url_for('submit_client_form'))
+
+            return redirect(url_for('my_clients'))
         
         flash('Success: {} submitted'.format(client))
         db.close()
@@ -458,7 +451,7 @@ def execute_exchange():
 
     db.close()
 
-    return redirect(url_for('client_statuses'))
+    return redirect(url_for('my_clients'))
 
     
 
@@ -528,7 +521,7 @@ def logout():
     session.pop('logged_in', None)
     session.pop('login_time', None)
     flash('Success: You were logged out')
-    return redirect(url_for('login'))
+    return redirect(url_for('index'))
 
 
 
