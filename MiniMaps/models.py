@@ -92,6 +92,10 @@ class MatchLog(db.Model):
     p2 = db.Column(db.String())
     char1 = db.Column(db.String())
     char2 = db.Column(db.String())
+    game = db.Column(db.String())
+    league = db.Column(db.String())
+    timestamp = db.Column(db.String())
+    winner = db.Column(db.String())
 
 
 # class Sequence(db.Model):

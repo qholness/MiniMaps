@@ -3,10 +3,18 @@
     <h2>Register a new account</h2>
     <form action="{{ url_for('submitRegistration') }}" method=POST>
         <dl>
-            <dt>Username:
-            <dd><input type="text" name=username>
-            <dt>Password:
-            <dd><input type="password" name=password>
+            <dd><input type="text" name=username placeholder="Username">
+            </dd>
+            <dd><input type="password" name=password placeholder="Password">
+            </dd>
+            <dd>
+                <select name=leagueSelection>
+                    <option value="">Select a League to Join</option>
+                    {% for league in leagues %}
+                        <<option value="{{ league }}">{{ league }}</option>
+                    {% endfor %}
+                </select>
+            </dd>
             <dd><input type="submit" name=Login>
         </dl>
     </form>
