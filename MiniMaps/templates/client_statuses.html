@@ -6,8 +6,9 @@
     <hr>
     <!--Status count container-->
     <div class="container-fluid">
+        <h3><strong>Total Caseload</strong>: {{ counts.values|sum }}</h3>
         <div class="row">
-            {% for k, v in counts.items() %}
+            {% for k, v in counts.items()|sort %}
                 {% set backgroundColor = status_colors.get(k, 'white') %}
                 {% set textColor = text_colors.get(k, 'black') %}
                 <div class="col-sm-4" style="
