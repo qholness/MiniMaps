@@ -297,7 +297,6 @@ def submit_client():
             VALUES (?, ?, ?, ?, ?, ?, ?);''',
                 [client, "Open", instanceUrl, importUrl, timestamp, timestamp, session['user']]
             )
-            flash("Success importing")
             
         except:
             
@@ -410,6 +409,7 @@ def update_client():
 
 @MinimalMaps.route('/view-note')
 def full_note():
+    
     return request.args.get('note')
 
 
