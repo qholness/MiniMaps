@@ -30,7 +30,12 @@
             </table>
             <script>
                 $(document).ready(function() {
-                    $('#{{ tname }}').DataTable();
+                    $('#{{ tname }}').DataTable( {
+                        {% if 'timestamp' in columns %}
+                            {% set time_position = columns.index('timestamp') %}
+                            'order' : [[{{ time_position|int }}, "desc"]]
+                        {% endif %}
+                    });
                 });
             </script>
         {% endfor %}
