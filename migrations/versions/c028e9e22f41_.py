@@ -26,7 +26,6 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     # op.drop_table('sqlite_sequence')
-    pass
     # ### end Alembic commands ###
 
 

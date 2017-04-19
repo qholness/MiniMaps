@@ -345,15 +345,6 @@ def submit_client():
 
 #     return render_template('update_client_form.html', clients=clients, statii=statii)
 
-def execute_updates(db, execution_string):
-    try:
-        db.execute(execution_string)
-        flash("Success: {}".format(execution_string))
-    except:
-        # Flash messages
-        flash('''Fail to update "{}"'''.format(client))
-        flash("Fail: {}".format(sys.exc_info()))
-
 
 def fix_input_string(string):
     new_string = ""
@@ -394,16 +385,20 @@ def update_client():
         if est_completion:
             # Update est_completion if requested
             db.execute('''UPDATE clients 
-                SET [est_completion] = ? 
-                WHERE [name] = ?;''', (est_completion, client)
+                SET [estimated_completion] = ? 
+                WHERE [name] = ?;''', (estimated_completion, client)
             )
         
         if import_notes:
             # Only update notes if passed
+            db.execute('''INSERT INTO client_history [name], [note], [timestamp]
+                VALUES (?,?,?)''', (client, import_notes, today())
+            ) # Story note history
+
             db.execute('''UPDATE clients 
                 SET [import_notes] = ? 
                 WHERE [name] = ?;''', (import_notes, client)
-            )
+            ) # Update current note attached
     else:
     
         flash("No client selected")
