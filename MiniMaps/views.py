@@ -163,7 +163,7 @@ def execute_sql():
                 session['data'][s] = pd.read_sql(s, db).to_json() # Hash results to select statement
             else:
                 db.execute(s)
-                flash("Success".format(s))
+                flash("Success: {}".format(s))
         except:
             flash("Fail: {}".format(sys.exc_info()))
     
