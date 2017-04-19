@@ -81,8 +81,12 @@
 
     <!--Bottom bar-->
     {% if user %}
-        <div class=container style="left: 10%; bottom: 0px; position: fixed; height: 30px; width: 100%">
-             <span>Logged In as: {{ user }}. {{ login_time }}</span>
+        <div class=container style="bottom: 0px; position: fixed; height: 30px; width: 100%" align=center>
+             <span><strong>Logged In Since</strong>: {{ login_time }}</span>
+             |
+             <span><a href="{{ url_for('change_password') }}">Change Password</a></span>
+             |
+             <span><a href="{{ url_for('game') }}">Game.js</a></span>
         </div>
     {% endif %}
 
