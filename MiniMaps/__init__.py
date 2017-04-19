@@ -2,7 +2,8 @@ import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_sslify import SSLify
+from flask_bootstrap import Bootstrap
+# from utils.security import ts
 
 MinimalMaps = Flask(__name__) # Create MinimalMapslication instance
 MinimalMaps.config.from_object(__name__)
@@ -20,6 +21,6 @@ MinimalMaps.config.update(dict(
     )
 )
 
-sslify = SSLify(MinimalMaps, subdomains=True, permanent=True)
 database = SQLAlchemy(MinimalMaps)
 migrate = Migrate(MinimalMaps, database)
+Bootstrap(MinimalMaps)

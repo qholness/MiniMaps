@@ -1,3 +1,3 @@
 from main import MinimalMaps
 
-MinimalMaps.app.run(debug=True)
+MinimalMaps.run(debug=True)
