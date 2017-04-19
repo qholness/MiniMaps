@@ -287,7 +287,7 @@ def submit_client():
     if client:
         instanceUrl = request.form['client_url'] if request.form['client_url'] else "https://{}.briostack.com".format(client)
         importUrl = request.form['client_import_url'] if request.form['client_import_url'] else "https://import.briostack.com/{}/webtools/control/main".format(client)
-        timestamp = datetime.datetime.now().strftime('%D %T')
+        timestamp = today().strftime('%D %T')
 
         try:
             
@@ -364,7 +364,7 @@ def update_client():
     status = request.form['status']
     import_notes = fix_input_string(request.form['import_notes']) # This may be vulnerable.
     est_completion = fix_input_string(request.form['estimated_completion'])
-    timestamp = datetime.datetime.now().strftime('%D %T')
+    timestamp = today().strftime('%D %T')
 
     if check_login_status(): # Connect to database:
         return redirect('login')
@@ -392,7 +392,7 @@ def update_client():
             # Only update notes if passed
             db.execute('''INSERT INTO client_history ([name], [note], [timestamp])
                 VALUES (?,?,?)''', (client, import_notes, today())
-            ) # Story note history
+            ) # Store note history
 
             db.execute('''UPDATE clients 
                 SET [import_notes] = ? 
@@ -425,19 +425,6 @@ def register():
         return redirect(url_for('index'))
 
 
-@MinimalMaps.route('/exchange_client')
-def exchange_clients():
-    '''Allow users to pick up or remove extra clients'''
-    if check_login_status():
-        return redirect('login')
-    db = get_db()
-
-    clients = list(pd.read_sql('''SELECT DISTINCT [name] from clients''', db)['name'])
-    users = list(pd.read_sql('''SELECT DISTINCT username from users''', db)['username'])
-    
-    return render_template('exchange_clients.html', clients=clients, users=users)
-
-
 @MinimalMaps.route('/execute-client-exchange', methods=['POST'])
 def execute_exchange():
     '''Execute client exchange'''
@@ -447,17 +434,23 @@ def execute_exchange():
     db = get_db()
 
     try:
-        giveTo = request.form['giveTo']
-        client = request.form['client']
+        giveTo = request.form['giveTo'] # Giving to...
+        client = request.form['client'] # Client giving
+        
         db.execute('''UPDATE clients
-        SET [assignee] = ?
-        WHERE [name] = ?
-        ''', (giveTo, client)
+            SET [assignee] = ?
+            WHERE [name] = ?
+            ''', (giveTo, client)
         )
+
         flash("Success: Updated assignee of \"{}\" to {}".format(client, giveTo))
+
     except:
+
         flash("Fail: {}".format(sys.exc_info()))
+
     db.close()
+
     return redirect(url_for('client_statuses'))
 
     
@@ -488,14 +481,14 @@ def login():
 @MinimalMaps.route('/login_user', methods=['POST'])
 def login_user():
     '''Log the user in'''
-    username, password = None, None
-    combo = None
+    username, password, combo = None, None, None
 
     db = get_db()
 
     data = db.execute('''SELECT username, [password] FROM users''') # Grab users
 
     combo = data.fetchone() # Grab first username/password combo
+    
     while combo: # Iterate while there's still data
         username, password = combo # Set username and password
 

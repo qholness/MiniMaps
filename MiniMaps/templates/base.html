@@ -81,7 +81,7 @@
 
     <!--Bottom bar-->
     {% if user %}
-        <div class=container style="bottom: 0px; position: fixed; height: 30px; width: 100%" align=center>
+        <div id=BottomBar class=container align=center>
              <span><strong>Logged In Since</strong>: {{ login_time }}</span>
              |
              <span><a href="{{ url_for('change_password') }}">Change Password</a></span>
@@ -101,6 +101,17 @@
         .tableDiv {
             width: 100%;
             overflow-x: auto;
+        }
+        #BottomBar {
+            bottom: 0px;
+            position: fixed;
+            height: 30px;
+            width: 100%;
+            border-style: solid;
+            border-top: thin solid #e7e7e7;
+            border-bottom: none;
+            border-left: none;
+            border-right: none;
         }
     </style>
 
