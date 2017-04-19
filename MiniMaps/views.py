@@ -391,7 +391,7 @@ def update_client():
         
         if import_notes:
             # Only update notes if passed
-            db.execute('''INSERT INTO client_history [name], [note], [timestamp]
+            db.execute('''INSERT INTO client_history ([name], [note], [timestamp])
                 VALUES (?,?,?)''', (client, import_notes, today())
             ) # Story note history
 
