@@ -169,7 +169,13 @@ def execute_sql():
     
     db.close()
     
-    return redirect(url_for('submit_sql'))
+    if session['data']:
+        
+        return redirect(url_for('submit_sql'))
+    
+    else:
+        
+        return redirect(url_for('my_clients'))
 
 
 
@@ -270,7 +276,7 @@ def clean_client_name(string):
     invalid_chars = "!@$%^&*)(}{][`~\'\"\\/><,.?;+=' "
     for s in string:
         if s not in invalid_chars:
-            new_string += s
+            new_string += s.lower()
     return new_string if len(new_string) > 0 else None
 
 
@@ -279,6 +285,7 @@ def submit_client():
     '''Create a new client'''
     if check_login_status(): # Establish credintials and connection
         return redirect('login')
+
     db = get_db()
 
     client = request.form['client_name'] # Grab client from form
