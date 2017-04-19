@@ -20,6 +20,6 @@ MinimalMaps.config.update(dict(
     )
 )
 
+sslify = SSLify(MinimalMaps, subdomains=True, permanent=True)
 database = SQLAlchemy(MinimalMaps)
 migrate = Migrate(MinimalMaps, database)
-sslify = SSLify(MinimalMaps, subdomains=True)
