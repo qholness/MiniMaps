@@ -7,33 +7,9 @@ from MiniMaps.dbtools import *
 from MiniMaps.models import *
 from MiniMaps.utils import *
 from flask import request, session, redirect, url_for, abort, render_template, flash
+from werkzeug.security import generate_password_hash, check_password_hash
 import pandas as pd
 import datetime
-
-def checkUserNameIntegrity(username):
-    # Some error checks...
-    return username
-
-
-def encodePassword(password):
-    '''Hash and salt password'''
-    t_sha = hashlib.sha512()
-    password = str.encode(password)
-    salt = base64.urlsafe_b64encode(uuid.uuid4().bytes)
-    t_sha.update(password + salt)
-    hashedpassword = base64.urlsafe_b64encode(t_sha.digest())
-    return hashedpassword
-
-
-
-
-# def decodePassword(password):
-#     t_sha = hashlib.sha512()
-#     password = str.encode(password)
-#     salt = base64.urlsafe_b64encode(uuid.uuid4().bytes)
-#     t_sha.update(password + salt)
-#     hashedpassword = base64.urlsafe_b64encode(t_sha.digest())
-#     return hashedpassword
 
 
 ################ User Registration ################
@@ -73,7 +49,7 @@ def submitRegistration():
     
     try:
         db.execute('''INSERT INTO users (username, [password], [league]) VALUES (?, ?, ?)''',
-            (username, password, league)
+            (username, generate_password_hash(password), league)
         )
     except:
         db.close()
@@ -81,7 +57,9 @@ def submitRegistration():
         return redirect(url_for('register'))
 
     db.close()
+    
     flash('You have registered', 'success')
+
     return redirect(url_for('login'))
 
 
@@ -108,7 +86,7 @@ def login_user():
         checkpass = request.form['password']
 
         if checkname == username:
-            if checkpass == password:
+            if check_password_hash(password, checkpass):
                 session['logged_in'] = True
                 session['user'] = checkname
                 session['login_time'] = timestamp()
