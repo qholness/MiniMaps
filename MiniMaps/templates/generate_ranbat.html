@@ -40,7 +40,7 @@
         <div class=row>
             
         <div class="col-xs-3">
-            <select class="btn btn-info" name=p1 id=p1 onchange="addToWinner('p1')">
+            <select class="form-control" name=p1 id=p1 onchange="addToWinner('p1')">
                 <option value="">Select Player 1</option>
                 {% for gamer in players %}
                     <option value="{{ gamer }}">{{ gamer }}</option>
@@ -49,7 +49,7 @@
         </div>
 
         <div class="col-xs-3">
-            <select class="btn btn-info" name=p2 id=p2 onchange="addToWinner('p2')">
+            <select class="form-control" name=p2 id=p2 onchange="addToWinner('p2')">
                 <option value="">Select Player 2</option>
                 {% for gamer in players %}
                     <option value="{{ gamer }}">{{ gamer }}</option>
@@ -58,7 +58,7 @@
         </div>
         
         <div class="col-xs-3">
-            <select class="btn btn-info" name=char1>
+            <select class="form-control" name=char1>
                 <option value="">Select Player 1's character</option>
                 {% for char in characters %}
                     <option value="{{ char }}">{{ char }}</option>
@@ -67,7 +67,7 @@
         </div>
 
         <div class="col-xs-3">
-            <select class="btn btn-info" name=char2>
+            <select class="form-control" name=char2>
                 <option value="">Select Player 2's character</option>
                 {% for char in characters %}
                     <option value="{{ char }}">{{ char }}</option>
@@ -76,8 +76,8 @@
         </div>
 
         </div>
-        
-        <select name=winner id=winnerSelect>
+        <br><br>
+        <select name=winner id=winnerSelect class="form-control">
             <option value="">Select Winner</option>
         </select>
 

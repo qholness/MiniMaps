@@ -1,21 +1,28 @@
 {% extends 'base.html' %}
 {% block content %}
-    <h2>Register a new account</h2>
-    <form action="{{ url_for('submitRegistration') }}" method=POST>
-        <dl>
-            <dd><input type="text" name=username placeholder="Username">
-            </dd>
-            <dd><input type="password" name=password placeholder="Password">
-            </dd>
-            <dd>
-                <select name=leagueSelection>
-                    <option value="">Select a League to Join</option>
-                    {% for league in leagues %}
-                        <<option value="{{ league }}">{{ league }}</option>
-                    {% endfor %}
-                </select>
-            </dd>
-            <dd><input type="submit" name=Login>
-        </dl>
-    </form>
+    <h1>Register a new account</h1>
+    <div class=row> 
+        <div class="col-xs-2">
+            <form action="{{ url_for('submitRegistration') }}" method=POST>
+                <dl>
+                    <dd><input type="text" name=username placeholder="Username">
+                    </dd>
+                    <br>
+                    <dd><input type="password" name=password placeholder="Password">
+                    </dd>
+                    <br>
+                    <dd>
+                        <select class="form-control" name=leagueSelection width="100%">
+                            <option value="">Select a League to Join</option>
+                            {% for league in leagues %}
+                                <<option value="{{ league }}">{{ league }}</option>
+                            {% endfor %}
+                        </select>
+                    </dd>
+                    <br>
+                    <dd><input type="submit" name=Login>
+                </dl>
+            </form>
+        </div>
+    </div>
 {% endblock %}

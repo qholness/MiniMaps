@@ -1,0 +1,4 @@
+Tournament organizers.
+Tournament participants.
+
+A user who creates a ranbat is elevated to TO and returned after submission

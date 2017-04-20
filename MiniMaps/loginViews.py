@@ -1,12 +1,14 @@
+'''
+    Login views
+'''
+
 from MiniMaps import MinimalMaps
 from MiniMaps.dbtools import *
 from MiniMaps.models import *
+from MiniMaps.utils import *
 from flask import request, session, redirect, url_for, abort, render_template, flash
 import pandas as pd
 import datetime
-global timestamp
-timestamp = lambda : datetime.datetime.strftime(datetime.datetime.utcnow(), "%D %T")
-
 
 def checkUserNameIntegrity(username):
     # Some error checks...
@@ -41,9 +43,9 @@ def register():
         db = get_db()
         leagues = list(pd.read_sql('''SELECT DISTINCT [name] FROM leagues''', db)['name'])
         db.close()
-        flash("Enter your credentials to crete an account")
+        flash("Enter your credentials to create an account", "info")
         return render_template('register.html', leagues=leagues)
-    flash('You are already logged in', 'warning')
+    flash('You are already logged in', 'info')
     return redirect(url_for('index'))
 
 
@@ -59,16 +61,25 @@ def submitRegistration():
 
     if not username:
         flash("Please enter a username", 'warning')
+        return redirect(url_for('register'))
     
     if not password:
         flash("Please enter a password", 'warning')
-    
+        return redirect(url_for('register'))
+
     if not league:
         flash("Please select a league you'd like to join", 'warning')
-        
-    db.execute('''INSERT INTO users (username, [password], [league]) VALUES (?, ?, ?)''',
-        (username, password, league)
-    )
+        return redirect(url_for('register'))
+    
+    try:
+        db.execute('''INSERT INTO users (username, [password], [league]) VALUES (?, ?, ?)''',
+            (username, password, league)
+        )
+    except:
+        db.close()
+        flash("Registration failed", "danger")
+        return redirect(url_for('register'))
+
     db.close()
     flash('You have registered', 'success')
     return redirect(url_for('login'))
@@ -112,10 +123,12 @@ def login_user():
 @MinimalMaps.route('/logout')
 def logout():
     '''Log user out'''
-    session.pop('logged_in', None)
-    session.pop('user', None)
-    session.pop('login_time', None)
-
+    session.clear()
     flash('You were logged out', 'info')
-
     return redirect(url_for('index'))
+
+
+@MinimalMaps.before_request
+def timout_session_update():
+    '''Remove user after 3 days of inactivity'''
+    MinimalMaps.permanent_session_lifetime = datetime.timedelta(days=3)

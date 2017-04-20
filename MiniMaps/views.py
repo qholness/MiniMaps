@@ -1,6 +1,7 @@
 from MiniMaps import MinimalMaps
 from MiniMaps.dbtools import *
 from MiniMaps.models import *
+from MiniMaps.utils import *
 from flask import request, session, redirect, url_for, abort, render_template, flash
 import pandas as pd
 import datetime
@@ -8,13 +9,6 @@ import hashlib
 import base64
 import uuid
 import sys
-global timestamp
-timestamp = lambda : datetime.datetime.strftime(datetime.datetime.utcnow(), "%D %T")
-
-
-
-################ utils ####################
-row_zero = lambda data: {k : v[0] for k, v in data.items()}
 
 
 @MinimalMaps.route('/')
@@ -33,28 +27,20 @@ def showMe():
         return redirect(url_for('login'))
     
     db = get_db()
-
-    user_data = row_zero(
-        pd.read_sql('''
-            SELECT * 
-            FROM users 
-            WHERE [username] = '{}';'''
-            .format(session['user']), db)
-        .to_dict('list')
-    )
-
-    league_data = row_zero(
-        pd.read_sql('''
-            SELECT * 
-            FROM leagues 
-            WHERE [name] = '{}';'''
-            .format(user_data['league']), db)
-        .to_dict('list')
-    )
+    
+    if not session.get('user_data'):
+        session['user_data'] = row_zero(
+            pd.read_sql('''
+                SELECT * 
+                FROM users 
+                WHERE [username] = '{}';'''
+                .format(session['user']), db)
+            .to_dict('list')
+        ) # Data for user's data table
     
     db.close()
 
-    return render_template('me.html', user_data=user_data, league_data=league_data)
+    return render_template('me.html', user_data=session.get('user_data'))
 
 ################ User views ################
 @MinimalMaps.route('/game')

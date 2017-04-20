@@ -31,8 +31,9 @@ def init_match_table():
 @MinimalMaps.route('/ranbat')
 def event():
     if not session.get('user'):
-        flash('You must be logged in to view this page')
+        flash('You must be logged in to view this page', 'warning')
         return redirect(url_for('index'))
+
     db = get_db()
     
     leagues = pd.read_sql('''
@@ -72,6 +73,11 @@ def get_characters(db, game):
 
 @MinimalMaps.route('/ranbat-create-league', methods=['GET', 'POST'])
 def get_league_data():
+    '''?'''
+    session['user_status'] = "TO"
+    if not session.get('user_status'):
+        flash("You must create a tournament to view this page", 'info')
+        return redirect(url_for('event'))
     league = request.form.get('league', None)
     game = request.form.get('game', None)
 
